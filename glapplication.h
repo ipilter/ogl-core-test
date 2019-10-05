@@ -4,6 +4,7 @@
 #include "mesh.h"
 #include "types.h"
 #include "io.h"
+#include "shader_manager.h"
 
 // ideas from
 // https://open.gl/content/code/c2_triangle_elements.txt
@@ -23,8 +24,6 @@ public:
   void flip_axis();
 
 private:
-  void create_shader(const std::string& vs_filepath
-                     , const std::string& fs_filepath);
   void create_scene();
   void destroy_scene() noexcept;
 
@@ -36,12 +35,9 @@ private:
 
   bool m_render_axis;
 
-  std::vector<mesh::ptr> m_meshes;
+  std::vector<opengl::mesh::ptr> m_meshes;
 
-  // shader program
-  GLuint m_vertex_shader;
-  GLuint m_fragment_shader;
-  GLuint m_shader_program;
+  opengl::shader_manager m_shader_manager;
 
 private:
   static void display_callback();

@@ -61,16 +61,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\point_per_pixel.frag">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\point_per_pixel.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
     <None Include="shaders\simple_color.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="shaders\simple_color.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\per_pixel_diffuse.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\per_pixel_diffuse.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

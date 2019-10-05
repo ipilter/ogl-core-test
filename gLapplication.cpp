@@ -70,10 +70,10 @@ void GLApplication::render()
 
   if (m_render_axis)
   {
-    m_meshes[0]->render(m_shader_program, m_projection, m_view);
+   m_meshes[0]->render(*m_shader_manager.get("simple_color"), m_projection, m_view);
   }
 
-  m_meshes[1]->render(m_shader_program, m_projection, m_view);
+  m_meshes[1]->render(*m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
 }
 
 void GLApplication::request_update()
@@ -84,84 +84,6 @@ void GLApplication::request_update()
 void GLApplication::update_projection()
 {
   m_projection = glm::perspectiveFov(glm::radians(75.0), static_cast<double>(m_window_size.x), static_cast<double>(m_window_size.y), 0.01, 1000.0);
-}
-
-void GLApplication::create_shader(const std::string& vs_filepath, const std::string& fs_filepath)
-{
-  std::string v_src;
-  io::load_src(vs_filepath, v_src);
-
-  std::string f_src;
-  io::load_src(fs_filepath, f_src);
-
-  const char* vstr[] = { v_src.c_str() };
-  const char* fstr[] = { f_src.c_str() };
-
-  m_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  m_fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-  glShaderSource(m_vertex_shader, 1, vstr, NULL);
-  glCompileShader(m_vertex_shader);
-
-  GLint status = GL_FALSE;
-  int info_size(0);
-
-  // Check Vertex Shader
-  glGetShaderiv(m_vertex_shader, GL_COMPILE_STATUS, &status);
-  if (status == GL_FALSE)
-  {
-    glGetShaderiv(m_vertex_shader, GL_INFO_LOG_LENGTH, &info_size);
-    std::string msg;
-    if (info_size > 0)
-    {
-      std::string buffer(info_size + 1, ' ');
-      glGetShaderInfoLog(m_vertex_shader, info_size, NULL, &buffer[0]);
-      msg.swap(buffer);
-    }
-
-    throw std::runtime_error(std::string("cannot compile vertex shader: ") + msg);
-  }
-
-  glShaderSource(m_fragment_shader, 1, fstr, NULL);
-  glCompileShader(m_fragment_shader);
-
-  // Check Fragment Shader
-  glGetShaderiv(m_fragment_shader, GL_COMPILE_STATUS, &status);
-  if (status == GL_FALSE)
-  {
-    glGetShaderiv(m_fragment_shader, GL_INFO_LOG_LENGTH, &info_size);
-    std::string msg;
-    if (info_size > 0)
-    {
-      std::string buffer(info_size + 1, ' ');
-      glGetShaderInfoLog(m_fragment_shader, info_size, NULL, &buffer[0]);
-      msg.swap(buffer);
-    }
-
-    throw std::runtime_error(std::string("cannot compile fragment shader: ") + msg);
-  }
-
-  m_shader_program = glCreateProgram();
-  glAttachShader(m_shader_program, m_vertex_shader);
-  glAttachShader(m_shader_program, m_fragment_shader);
-  glLinkProgram(m_shader_program);
-
-  // Check the program
-  glGetProgramiv(m_shader_program, GL_LINK_STATUS, &status);
-
-  if (status == GL_FALSE)
-  {
-    glGetShaderiv(m_shader_program, GL_INFO_LOG_LENGTH, &info_size);
-    std::string msg;
-    if (info_size > 0)
-    {
-      std::string buffer(info_size + 1, ' ');
-      glGetShaderInfoLog(m_shader_program, info_size, NULL, &buffer[0]);
-      msg.swap(buffer);
-    }
-
-    throw std::runtime_error(std::string("cannot link shader program: ") + msg);
-  }
 }
 
 void GLApplication::create_scene()
@@ -176,9 +98,8 @@ void GLApplication::create_scene()
   }
 
   // shaders
-  {
-    create_shader("shaders\\simple_color.vert", "shaders\\simple_color.frag");
-  }
+  m_shader_manager.create("simple_color", "shaders\\simple_color.vert", "shaders\\simple_color.frag");
+  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", "shaders\\per_pixel_diffuse.frag");
 
   // create axis mesh
   {
@@ -208,7 +129,7 @@ void GLApplication::create_scene()
       0, 1, 2, 3, 4, 5
     };
 
-    m_meshes.push_back(mesh::ptr(new mesh()));
+    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh()));
     m_meshes[0]->create(vertices, colors, indices);
     m_meshes[0]->set_primitive_type(GL_LINES);
   }
@@ -217,25 +138,36 @@ void GLApplication::create_scene()
   {
     std::vector<vec3> vertices
     {
-      vec3(0.0f, 0.0f, 0.0f),
+      vec3(0.1f, 0.0f, 0.1f),
       vec3(1.0f, 0.0f, 0.0f),
-      vec3(0.0f, 0.0f, 1.0f)
+      vec3(0.0f, 0.0f, 1.0f),
+      vec3(1.0f, -0.3f, 1.0f)
     };
 
     std::vector<vec3> colors
     {
       vec3(1.0f, 0.0f, 0.0f),
       vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 0.0f, 1.0f)
+      vec3(0.0f, 0.0f, 1.0f),
+      vec3(1.0f, 1.0f, 1.0f)
+    };
+
+    std::vector<vec3> normals
+    {
+      vec3(0.0f, 1.0f, 0.0f),
+      vec3(0.0f, 1.0f, 0.0f),
+      vec3(0.0f, 1.0f, 0.0f),
+      vec3(1.0f, 1.0f, 1.0f)
     };
 
     std::vector<unsigned> indices
     {
-      0, 1, 2
+      0, 1, 2,
+      2, 1, 3
     };
 
-    m_meshes.push_back(mesh::ptr(new mesh()));
-    m_meshes[1]->create(vertices, colors, indices);
+    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh()));
+    m_meshes[1]->create(vertices, colors, normals, indices);
     m_meshes[1]->set_primitive_type(GL_TRIANGLES);
   }
 }
@@ -256,38 +188,37 @@ void GLApplication::keyboard_callback(unsigned char character, int x, int y)
   bool need_redraw(false);
   switch (character)
   {
-  case 'r':
-  {
-    break;
-  }
-  case 'u':
-  {
-    break;
-  }
-  case 's':
-  {
-    break;
-  }
-  case 'a':
-  {
-    instance().flip_axis();
-    need_redraw = true;
-    break;
-  }
-  case 'v':
-  {
-    break;
-  }
-  case 27:
-  {
-    // cleanup
-    exit(0); // say good bye
-    break;
-  }
-  case 32:
-  {
-    break;
-  }
+    case 'r':
+    {
+      break;
+    }
+    case 'u':
+    {
+      break;
+    }
+    case 's':
+    {
+      break;
+    }
+    case 'a':
+    {
+      instance().flip_axis();
+      need_redraw = true;
+      break;
+    }
+    case 'v':
+    {
+      break;
+    }
+    case 27:
+    {
+      exit(0);
+      break;
+    }
+    case 32:
+    {
+      break;
+    }
   }
 
   if (need_redraw)

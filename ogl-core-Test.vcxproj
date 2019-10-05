@@ -108,8 +108,8 @@
     <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\point_per_pixel.frag" />
-    <None Include="shaders\point_per_pixel.vert" />
+    <None Include="shaders\per_pixel_diffuse.frag" />
+    <None Include="shaders\per_pixel_diffuse.vert" />
     <None Include="shaders\simple_color.frag" />
     <None Include="shaders\simple_color.vert" />
   </ItemGroup>

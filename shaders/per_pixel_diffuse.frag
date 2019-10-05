@@ -1,3 +1,4 @@
+// per pixel diffuse fragment
 #version 450 core
 
 in vec3 fragmentColor;
