@@ -16,7 +16,7 @@ public:
 
 public:
   void init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version);
-  void run(); // glut never returns
+  void run();
   void render();
   void request_update();
   void update_projection();
@@ -29,6 +29,7 @@ private:
   void destroy_scene() noexcept;
 
 private:
+  // camera
   uvec2 m_window_size;
   mat4 m_projection;
   mat4 m_view;
@@ -37,7 +38,7 @@ private:
 
   std::vector<mesh::ptr> m_meshes;
 
-  // shader
+  // shader program
   GLuint m_vertex_shader;
   GLuint m_fragment_shader;
   GLuint m_shader_program;
