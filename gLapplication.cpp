@@ -1,13 +1,9 @@
 #pragma once
 
-
-#include <glm\gtc\matrix_transform.hpp>
 #include "types.h"
 #include "io.h"
 
 #include "glapplication.h"
-
-// ideas from http://www.opengl-tutorial.org/download/
 
 GLApplication& GLApplication::instance()
 {
@@ -23,17 +19,16 @@ GLApplication::GLApplication()
 {}
 
 GLApplication::~GLApplication()
-{
-}
+{}
 
 void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version)
 {
-  m_window_size = window_size;
-
   if (argc < 1)
   {
     throw std::runtime_error("missing parameter");
   }
+
+  m_window_size = window_size;
 
   glutInit(&argc, argv);
   glutInitContextVersion(opengl_version.x, opengl_version.y);
@@ -70,10 +65,10 @@ void GLApplication::render()
 
   if (m_render_axis)
   {
-   m_meshes[0]->render(*m_shader_manager.get("simple_color"), m_projection, m_view);
+    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection, m_view);
   }
 
-  m_meshes[1]->render(*m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
+  m_meshes[1]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
 }
 
 void GLApplication::request_update()
@@ -138,18 +133,18 @@ void GLApplication::create_scene()
   {
     std::vector<vec3> vertices
     {
-      vec3(0.1f, 0.0f, 0.1f),
+      vec3(0.0f, 0.0f, 0.0f),
       vec3(1.0f, 0.0f, 0.0f),
       vec3(0.0f, 0.0f, 1.0f),
-      vec3(1.0f, -0.3f, 1.0f)
+      vec3(1.0f, 0.0f, 1.0f)
     };
 
     std::vector<vec3> colors
     {
-      vec3(1.0f, 0.0f, 0.0f),
-      vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 0.0f, 1.0f),
-      vec3(1.0f, 1.0f, 1.0f)
+      vec3(0.4f, 0.5f, 0.6f),
+      vec3(0.4f, 0.5f, 0.6f),
+      vec3(0.4f, 0.5f, 0.6f),
+      vec3(0.4f, 0.5f, 0.6f)
     };
 
     std::vector<vec3> normals
@@ -183,7 +178,7 @@ void GLApplication::flip_axis()
 }
 
 // static
-void GLApplication::keyboard_callback(unsigned char character, int x, int y)
+void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*y*/)
 {
   bool need_redraw(false);
   switch (character)

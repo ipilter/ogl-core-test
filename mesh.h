@@ -17,7 +17,7 @@ public:
   mesh();
   ~mesh();
 
-  void render(opengl::shader_program& shader_program
+  void render(const shader_program& shader_program
               , const mat4& projection
               , const mat4& view);
 
@@ -49,4 +49,3 @@ private:
   unsigned m_index_buffer;
 };
 }
-

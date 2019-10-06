@@ -26,12 +26,13 @@ namespace io
       std::stringstream ss;
       ss << "Could not open shader source file [";
       ss << path;
-      ss << "].";
+      ss << "]";
       throw std::runtime_error(ss.str());
     }
 
     std::stringstream ss;
     ss << file.rdbuf();
-    src = ss.str();
+
+    src.assign(ss.str());
   }
 }

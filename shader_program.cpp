@@ -51,11 +51,10 @@ void shader_program::link()
 {
   glLinkProgram(m_shader_program);
   
-  GLint linked(0);
+  GLint linked(GL_FALSE);
   glGetProgramiv(m_shader_program, GL_LINK_STATUS, &linked);
   if (linked == GL_FALSE)
   {
-    GLint status = GL_FALSE;
     int info_size(0);
 
     glGetShaderiv(m_shader_program, GL_INFO_LOG_LENGTH, &info_size);
@@ -74,11 +73,10 @@ void shader_program::compile(unsigned shader_id)
 {
   glCompileShader(shader_id);
 
-  GLint compiled(0);
+  GLint compiled(GL_FALSE);
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &compiled);
   if (compiled == GL_FALSE)
   {
-    GLint status = GL_FALSE;
     int info_size(0);
 
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &compiled);

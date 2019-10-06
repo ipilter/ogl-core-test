@@ -54,9 +54,10 @@ void shader_manager::remove(const std::string& name)
   }
 }
 
-shader_program::ptr shader_manager::get(const std::string& name)
+const shader_program& shader_manager::get(const std::string& name) const
 {
-  if (m_shader_programs.find(name) == m_shader_programs.end())
+  const auto it = m_shader_programs.find(name);
+  if (it == m_shader_programs.end())
   {
     std::stringstream ss;
     ss << "Shader program with name [";
@@ -64,6 +65,7 @@ shader_program::ptr shader_manager::get(const std::string& name)
     ss << "] does not exist!";
     throw std::runtime_error (ss.str ());
   }
-  return m_shader_programs[name];
+
+  return *it->second;
 }
 };

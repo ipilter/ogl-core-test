@@ -13,50 +13,67 @@ mesh::mesh()
 mesh::~mesh()
 {
   glDeleteVertexArrays(1, &m_vertex_array);
+
   glDeleteBuffers(1, &m_vertex_buffer);
-  glDeleteBuffers(1, &m_color_buffer);
   glDeleteBuffers(1, &m_index_buffer);
+
+  if (m_color_buffer)
+  {
+    glDeleteBuffers(1, &m_color_buffer);
+  }
   if (m_normal_buffer)
   {
     glDeleteBuffers(1, &m_normal_buffer);
   }
 }
 
-void mesh::render(opengl::shader_program& shader_program, const mat4& projection, const mat4& view)
+void mesh::render(const shader_program& shader_program, const mat4& projection, const mat4& view)
 {
   glBindVertexArray(m_vertex_array);
-  glEnableVertexAttribArray(0);
+
+  unsigned attrib_id(0);
+
+  glEnableVertexAttribArray(attrib_id);
   glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
   glVertexAttribPointer(
-    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+    attrib_id,          // attribute 0. No particular reason for 0, but must match the layout in the shader.
     3,                  // size
     GL_FLOAT,           // type
     GL_FALSE,           // normalized?
     0,                  // stride
     (void*)0            // array buffer offset
   );
+  ++attrib_id;
 
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, m_color_buffer);
-  glVertexAttribPointer(
-    1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-    3,                                // size
-    GL_FLOAT,                         // type
-    GL_FALSE,                         // normalized?
-    0,                                // stride
-    (void*)0                          // array buffer offset
-  );
+  if (m_color_buffer)
+  {
+    glEnableVertexAttribArray(attrib_id);
+    glBindBuffer(GL_ARRAY_BUFFER, m_color_buffer);
+    glVertexAttribPointer(
+      attrib_id,                        // attribute. No particular reason for 1, but must match the layout in the shader.
+      3,                                // size
+      GL_FLOAT,                         // type
+      GL_FALSE,                         // normalized?
+      0,                                // stride
+      (void*)0                          // array buffer offset
+    );
+    ++attrib_id;
+  }
 
-  glEnableVertexAttribArray(2);
-  glBindBuffer(GL_ARRAY_BUFFER, m_normal_buffer);
-  glVertexAttribPointer(
-    2,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-    3,                                // size
-    GL_FLOAT,                         // type
-    GL_FALSE,                         // normalized?
-    0,                                // stride
-    (void*)0                          // array buffer offset
-  );
+  if (m_normal_buffer)
+  {
+    glEnableVertexAttribArray(attrib_id);
+    glBindBuffer(GL_ARRAY_BUFFER, m_normal_buffer);
+    glVertexAttribPointer(
+      attrib_id,                        // attribute. No particular reason for 1, but must match the layout in the shader.
+      3,                                // size
+      GL_FLOAT,                         // type
+      GL_FALSE,                         // normalized?
+      0,                                // stride
+      (void*)0                          // array buffer offset
+    );
+    ++attrib_id;
+  }
 
   glUseProgram(shader_program.id());
   mat4 mvp = projection * view/* * Model*/;
@@ -86,19 +103,18 @@ void mesh::create(const std::vector<vec3>& vertices
   glBindVertexArray(m_vertex_array);
 
   glGenBuffers(1, &m_vertex_buffer);
-  glGenBuffers(1, &m_color_buffer);
-  glGenBuffers(1, &m_normal_buffer);
-  glGenBuffers(1, &m_index_buffer);
-
   glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * m_vertices.size(), &m_vertices[0], GL_STATIC_DRAW);
 
+  glGenBuffers(1, &m_color_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, m_color_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_colors.size(), &m_colors[0], GL_STATIC_DRAW);
 
+  glGenBuffers(1, &m_normal_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, m_normal_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_normals.size(), &m_normals[0], GL_STATIC_DRAW);
 
+  glGenBuffers(1, &m_index_buffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned) * m_indices.size(), &m_indices[0], GL_STATIC_DRAW);
 
@@ -110,8 +126,8 @@ void mesh::create(const std::vector<vec3>& vertices
 }
 
 void mesh::create(const std::vector<vec3>& vertices
-  , const std::vector<vec3> colors
-  , std::vector<unsigned> indices)
+                  , const std::vector<vec3> colors
+                  , std::vector<unsigned> indices)
 {
   // create cpu side
   m_vertices = vertices;
