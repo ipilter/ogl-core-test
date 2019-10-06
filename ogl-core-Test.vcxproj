@@ -10,6 +10,23 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\glapplication.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mesh.cpp" />
+    <ClCompile Include="src\shader_manager.cpp" />
+    <ClCompile Include="src\shader_program.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\glapplication.h" />
+    <ClInclude Include="src\io.h" />
+    <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\mesh.h" />
+    <ClInclude Include="src\opengl.h" />
+    <ClInclude Include="src\shader_manager.h" />
+    <ClInclude Include="src\shader_program.h" />
+    <ClInclude Include="src\types.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{54A484DC-FD00-476D-83C5-AFABED420368}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -90,29 +107,6 @@
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="glapplication.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="shader_manager.cpp" />
-    <ClCompile Include="shader_program.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="glapplication.h" />
-    <ClInclude Include="io.h" />
-    <ClInclude Include="math.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="opengl.h" />
-    <ClInclude Include="shader_manager.h" />
-    <ClInclude Include="shader_program.h" />
-    <ClInclude Include="types.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\per_pixel_diffuse.frag" />
-    <None Include="shaders\per_pixel_diffuse.vert" />
-    <None Include="shaders\simple_color.frag" />
-    <None Include="shaders\simple_color.vert" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

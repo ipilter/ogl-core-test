@@ -13,71 +13,60 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\shaders">
-      <UniqueIdentifier>{bb551aec-c682-4ed7-9225-595fcd87cb41}</UniqueIdentifier>
+    <Filter Include="Header Files\opengl">
+      <UniqueIdentifier>{2ab280b0-d9f6-4bda-b030-6a589168e5c4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\opengl">
-      <UniqueIdentifier>{1d24d9e0-8a81-45d7-a589-10ef743584c2}</UniqueIdentifier>
+      <UniqueIdentifier>{a3a0a7bb-8c17-4c0f-b6b5-40a51cab4939}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\opengl">
-      <UniqueIdentifier>{190f9374-b5c7-49f8-83e1-ad345025d9e8}</UniqueIdentifier>
+    <Filter Include="Header Files\math">
+      <UniqueIdentifier>{b927d71a-a01c-479c-b49f-61a49f22d2f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\io">
+      <UniqueIdentifier>{da3d2d44-9b43-4bb2-bff2-28f2337eb86f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\mesh.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader_manager.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader_program.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glapplication.cpp">
+    <ClCompile Include="src\glapplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="shader_manager.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="shader_program.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="glapplication.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="io.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="src\mesh.h">
       <Filter>Header Files\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="opengl.h">
+    <ClInclude Include="src\opengl.h">
       <Filter>Header Files\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="shader_manager.h">
+    <ClInclude Include="src\shader_manager.h">
       <Filter>Header Files\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="shader_program.h">
+    <ClInclude Include="src\shader_program.h">
       <Filter>Header Files\opengl</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\simple_color.frag">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\simple_color.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\per_pixel_diffuse.vert">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\per_pixel_diffuse.frag">
-      <Filter>Source Files\shaders</Filter>
-    </None>
+    <ClInclude Include="src\io.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\glapplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

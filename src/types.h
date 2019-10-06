@@ -6,9 +6,9 @@
 #include <glm\gtc\matrix_transform.hpp>
 #pragma warning( pop )
 
-typedef glm::uvec2 uvec2;
+using uvec2 = glm::uvec2;
 
-typedef glm::vec2 vec2; 
-typedef glm::vec3 vec3;
-typedef glm::vec4 vec4;
-typedef glm::mat4 mat4;
+using vec2 = glm::vec2;
+using vec3 = glm::vec3;
+using vec4 = glm::vec4;
+using mat4 = glm::mat4;
