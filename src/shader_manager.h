@@ -16,6 +16,10 @@ public:
   void create(const std::string& name
               , const std::string&
               , const std::string&);
+  void create(const std::string& name
+              , const std::string& vsFileName
+              , const std::string& gsFileName
+              , const std::string& fsFileName);
   void remove(const std::string& name);
   void remove_all();
 

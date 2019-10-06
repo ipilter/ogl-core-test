@@ -2,6 +2,10 @@
 
 #include <string>
 #include <memory>
+#include <map>
+#include <unordered_map>
+
+#include "opengl.h"
 
 namespace opengl
 {
@@ -11,16 +15,18 @@ public:
   using ptr = std::shared_ptr<shader_program>;
 
 public:
-  shader_program(const std::string&, const std::string&);
+  shader_program(const std::string& vs, const std::string& fs);
+  shader_program(const std::string& vs, const std::string& gs, const std::string& fs);
   ~shader_program();
 
   unsigned add_shader(const unsigned shader_kind
                       , const std::string&);
 
+  unsigned id() const;
+
+private:
   void compile(unsigned shader_id);
   void link();
-
-  unsigned id() const;
 
   //void GetProgramInfoLog(std::string&) const;
   //void GetVertexInfoLog(std::string&) const;
@@ -38,11 +44,25 @@ public:
 private:
   //int getUniformLoc(const std::string& name);
 
-  unsigned m_shader_program;
+  unsigned m_program;
   unsigned m_vertex_shader;
   unsigned m_fragment_shader;
+  unsigned m_geometry_shader;
+
+  std::map<unsigned, unsigned> m_id_kind_table;
+
+  static std::unordered_map<unsigned, std::string>& kind_name_table()
+  {
+    static std::unordered_map<unsigned, std::string> s_kind_name_table{
+      { GL_VERTEX_SHADER, "vertex shader"},
+      { GL_GEOMETRY_SHADER, "geometry shader"},
+      { GL_FRAGMENT_SHADER, "fragment shader"}
+    };
+    return s_kind_name_table;
+  }
 
   shader_program(const shader_program&) = delete;
   shader_program& operator = (const shader_program&) = delete;
 };
 };
+

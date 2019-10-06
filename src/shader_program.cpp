@@ -1,15 +1,27 @@
 #include <sstream>
 
 #include "shader_program.h"
-#include "opengl.h"
 
 namespace opengl
 {
 shader_program::shader_program(const std::string& vs
                                , const std::string& fs)
 {
-  m_shader_program = glCreateProgram();
+  m_program = glCreateProgram();
   m_vertex_shader = add_shader(GL_VERTEX_SHADER, vs);
+  m_geometry_shader = 0;
+  m_fragment_shader = add_shader(GL_FRAGMENT_SHADER, fs);
+
+  link();
+
+  opengl::check_gl();
+}
+
+shader_program::shader_program(const std::string& vs, const std::string& gs, const std::string& fs)
+{
+  m_program = glCreateProgram();
+  m_vertex_shader = add_shader(GL_VERTEX_SHADER, vs);
+  m_geometry_shader = add_shader(GL_GEOMETRY_SHADER, gs);
   m_fragment_shader = add_shader(GL_FRAGMENT_SHADER, fs);
 
   link();
@@ -19,11 +31,15 @@ shader_program::shader_program(const std::string& vs
 
 shader_program::~shader_program(void)
 {
-  glDetachShader(m_shader_program, m_vertex_shader);
-  glDetachShader(m_shader_program, m_fragment_shader);
+  glDetachShader(m_program, m_vertex_shader);
+  glDetachShader(m_program, m_fragment_shader);
   glDeleteShader(m_vertex_shader);
+  if (m_geometry_shader)
+  {
+    glDeleteShader(m_geometry_shader);
+  }
   glDeleteShader(m_fragment_shader);
-  glDeleteProgram(m_shader_program);
+  glDeleteProgram(m_program);
 }
 
 unsigned shader_program::add_shader(unsigned shader_kind
@@ -37,7 +53,9 @@ unsigned shader_program::add_shader(unsigned shader_kind
     throw std::runtime_error(ss.str());
   }
 
-  glAttachShader(m_shader_program, shader_id);
+  m_id_kind_table[shader_id] = shader_kind;
+
+  glAttachShader(m_program, shader_id);
   const char* str[] = { src.c_str() };
   glShaderSource(shader_id, 1, str, 0);
 
@@ -49,23 +67,27 @@ unsigned shader_program::add_shader(unsigned shader_kind
 
 void shader_program::link()
 {
-  glLinkProgram(m_shader_program);
-  
+  glLinkProgram(m_program);
+  opengl::check_gl();
   GLint linked(GL_FALSE);
-  glGetProgramiv(m_shader_program, GL_LINK_STATUS, &linked);
+  glGetProgramiv(m_program, GL_LINK_STATUS, &linked);
+  opengl::check_gl();
   if (linked == GL_FALSE)
   {
     int info_size(0);
-
-    glGetShaderiv(m_shader_program, GL_INFO_LOG_LENGTH, &info_size);
+    opengl::check_gl();
+    glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &info_size);
+    opengl::check_gl();
     std::string msg;
     if (info_size > 0)
     {
       std::string buffer(info_size + 1, ' ');
-      glGetShaderInfoLog(m_shader_program, info_size, NULL, &buffer[0]);
+      glGetProgramInfoLog(m_program, info_size, NULL, &buffer[0]);
       msg.swap(buffer);
     }
-    throw std::runtime_error(std::string("cannot link shader program: ") + msg);
+    std::stringstream ss;
+    ss << "cannot link shader program\n" << msg;
+    throw std::runtime_error(ss.str());
   }
 }
 
@@ -79,7 +101,7 @@ void shader_program::compile(unsigned shader_id)
   {
     int info_size(0);
 
-    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &compiled);
+    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_size);
     std::string msg;
     if (info_size > 0)
     {
@@ -87,13 +109,15 @@ void shader_program::compile(unsigned shader_id)
       glGetShaderInfoLog(shader_id, info_size, NULL, &buffer[0]);
       msg.swap(buffer);
     }
-    throw std::runtime_error(std::string("cannot compile vertex shader: ") + msg);
+    std::stringstream ss;
+    ss << "cannot compile " << kind_name_table()[m_id_kind_table[shader_id]] << " (id " << shader_id << ")\n" << msg;
+    throw std::runtime_error(ss.str());
   }
 }
 
 unsigned shader_program::id() const
 {
-  return m_shader_program;
+  return m_program;
 }
 
 //void shader_program::GetProgramInfoLog(std::string& log) const

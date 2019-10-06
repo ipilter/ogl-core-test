@@ -25,6 +25,9 @@
     <Filter Include="Header Files\io">
       <UniqueIdentifier>{da3d2d44-9b43-4bb2-bff2-28f2337eb86f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{ec046ae4-1595-4263-aebb-784782e5a112}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mesh.cpp">
@@ -68,5 +71,22 @@
     <ClInclude Include="src\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\per_pixel_diffuse.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\per_pixel_diffuse.geom">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\per_pixel_diffuse.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\simple_color.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\simple_color.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

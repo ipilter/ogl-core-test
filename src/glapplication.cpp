@@ -57,7 +57,7 @@ void GLApplication::run()
 
 void GLApplication::render()
 {
-  glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -94,7 +94,7 @@ void GLApplication::create_scene()
 
   // shaders
   m_shader_manager.create("simple_color", "shaders\\simple_color.vert", "shaders\\simple_color.frag");
-  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", "shaders\\per_pixel_diffuse.frag");
+  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", /*"shaders\\per_pixel_diffuse.geom", */"shaders\\per_pixel_diffuse.frag");
 
   // create axis mesh
   {

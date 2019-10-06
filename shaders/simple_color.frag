@@ -1,4 +1,4 @@
-// simple color fragment
+// frag sc
 #version 450 core
 
 in vec3 fragmentColor;

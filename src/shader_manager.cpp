@@ -41,6 +41,34 @@ void shader_manager::create(const std::string& name
   m_shader_programs[name] = program;
 }
 
+void shader_manager::create(const std::string& name
+                            , const std::string& vsFileName
+                            , const std::string& gsFileName
+                            , const std::string& fsFileName)
+{
+  if (m_shader_programs.find(name) != m_shader_programs.end())
+  {
+    std::stringstream ss;
+    ss << "Shader program with name [";
+    ss << name;
+    ss << "] already exist!";
+    throw std::runtime_error(ss.str());
+  }
+
+  std::string vs, gs, fs;
+  io::load_src(vsFileName, vs);
+  io::load_src(fsFileName, fs);
+  io::load_src(gsFileName, gs);
+  shader_program::ptr program(new shader_program(vs, gs, fs));
+
+  if (program == nullptr)
+  {
+    throw std::runtime_error("out of memory");
+  }
+
+  m_shader_programs[name] = program;
+}
+
 void shader_manager::remove_all (void)
 {
   m_shader_programs.clear ();
