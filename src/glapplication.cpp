@@ -69,7 +69,8 @@ void GLApplication::create_scene()
   // shaders
   m_shader_manager.create("simple_color", "shaders\\simple_color.vert", "shaders\\simple_color.frag");
   m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", "shaders\\per_pixel_diffuse.frag");
-  m_shader_manager.create("vertex_normal", "shaders\\vertex_normal.vert", "shaders\\vertex_normal.geom", "shaders\\vertex_normal.frag");
+  m_shader_manager.create("vertex_normal", "shaders\\vertex_normal.vert", "shaders\\vertex_normal.geom", "shaders\\vertex_normal.frag");  // todo layout number does not match with the vertex attrib loc!!
+  // maybe shader code can be the stronger and dictate which data is placed on which location. And before render assign the given data type to the location given by the shader program..
 
   // create axis mesh
   {
@@ -86,11 +87,11 @@ void GLApplication::create_scene()
 
     std::vector<vec3> colors
     {
-      vec3(0.7f, 0.0f, 0.0f),
       vec3(1.0f, 0.0f, 0.0f),
-      vec3(0.0f, 0.7f, 0.0f),
+      vec3(1.0f, 0.0f, 0.0f),
       vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 0.0f, 0.7f),
+      vec3(0.0f, 1.0f, 0.0f),
+      vec3(0.0f, 0.0f, 1.0f),
       vec3(0.0f, 0.0f, 1.0f)
     };
 
@@ -116,10 +117,10 @@ void GLApplication::create_scene()
 
     std::vector<vec3> colors
     {
-      vec3(0.4f, 0.5f, 0.6f),
-      vec3(0.4f, 0.5f, 0.6f),
-      vec3(0.4f, 0.5f, 0.6f),
-      vec3(0.4f, 0.5f, 0.6f)
+      vec3(1.0f, 0.0f, 0.0f),
+      vec3(0.0f, 1.0f, 0.0f),
+      vec3(0.0f, 0.0f, 1.0f),
+      vec3(1.0f, 1.0f, 1.0f)
     };
 
     std::vector<vec3> normals
@@ -127,7 +128,7 @@ void GLApplication::create_scene()
       vec3(0.0f, 1.0f, 0.0f),
       vec3(0.0f, 1.0f, 0.0f),
       vec3(0.0f, 1.0f, 0.0f),
-      vec3(1.0f, 1.0f, 1.0f)
+      vec3(0.0f, 1.0f, 0.0f)
     };
 
     std::vector<unsigned> indices
