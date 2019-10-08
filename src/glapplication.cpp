@@ -55,32 +55,6 @@ void GLApplication::run()
   glutMainLoop();
 }
 
-void GLApplication::render()
-{
-  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  if (m_render_axis)
-  {
-    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection, m_view);
-  }
-
-  m_meshes[1]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
-}
-
-void GLApplication::request_update()
-{
-  glutPostRedisplay();
-}
-
-void GLApplication::update_projection()
-{
-  m_projection = glm::perspectiveFov(glm::radians(75.0), static_cast<double>(m_window_size.x), static_cast<double>(m_window_size.y), 0.01, 1000.0);
-}
-
 void GLApplication::create_scene()
 {
   // camera
@@ -94,7 +68,8 @@ void GLApplication::create_scene()
 
   // shaders
   m_shader_manager.create("simple_color", "shaders\\simple_color.vert", "shaders\\simple_color.frag");
-  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", /*"shaders\\per_pixel_diffuse.geom", */"shaders\\per_pixel_diffuse.frag");
+  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", "shaders\\per_pixel_diffuse.frag");
+  m_shader_manager.create("vertex_normal", "shaders\\vertex_normal.vert", "shaders\\vertex_normal.geom", "shaders\\vertex_normal.frag");
 
   // create axis mesh
   {
@@ -165,6 +140,33 @@ void GLApplication::create_scene()
     m_meshes[1]->create(vertices, colors, normals, indices);
     m_meshes[1]->set_primitive_type(GL_TRIANGLES);
   }
+}
+
+void GLApplication::render()
+{
+  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  if (m_render_axis)
+  {
+    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection, m_view);
+  }
+
+  m_meshes[1]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
+  m_meshes[1]->render(m_shader_manager.get("vertex_normal"), m_projection, m_view);
+}
+
+void GLApplication::request_update()
+{
+  glutPostRedisplay();
+}
+
+void GLApplication::update_projection()
+{
+  m_projection = glm::perspectiveFov(glm::radians(75.0), static_cast<double>(m_window_size.x), static_cast<double>(m_window_size.y), 0.01, 1000.0);
 }
 
 void GLApplication::destroy_scene() noexcept

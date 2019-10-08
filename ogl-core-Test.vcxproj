@@ -29,10 +29,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\per_pixel_diffuse.frag" />
-    <None Include="shaders\per_pixel_diffuse.geom" />
     <None Include="shaders\per_pixel_diffuse.vert" />
     <None Include="shaders\simple_color.frag" />
     <None Include="shaders\simple_color.vert" />
+    <None Include="shaders\vertex_normal.frag" />
+    <None Include="shaders\vertex_normal.geom" />
+    <None Include="shaders\vertex_normal.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{54A484DC-FD00-476D-83C5-AFABED420368}</ProjectGuid>
