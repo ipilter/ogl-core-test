@@ -94,15 +94,15 @@ void shader_program::link()
   }
 }
 
-void shader_program::set_attribute_loc(const AttributeKind attribute_kind, const unsigned location)
+void shader_program::set_attribute_location(const attribute_kind::Enum attribute_kind, const unsigned location)
 {
-  m_attribute_table[attribute_kind] = location;
+  m_attribute_location_table[attribute_kind] = location;
 }
 
-unsigned shader_program::get_attribute_loc(const AttributeKind attribute_kind) const
+unsigned shader_program::attribute_location(const attribute_kind::Enum attribute_kind) const
 {
-  std::map<AttributeKind, unsigned>::const_iterator it = m_attribute_table.find(attribute_kind);
-  if (it == m_attribute_table.end())
+  std::map<attribute_kind::Enum, unsigned>::const_iterator it = m_attribute_location_table.find(attribute_kind);
+  if (it == m_attribute_location_table.end())
   {
     return invalid_attribute_location();
   }
@@ -227,4 +227,15 @@ void shader_program::setUniform4fv(const std::string& name, const unsigned count
   glUniform4fv(getUniformLoc(name), count, ptr);
 }
 
+std::unordered_map<unsigned, std::string>& shader_program::kind_name_table()
+{
+  static std::unordered_map<unsigned, std::string> s_kind_name_table;
+  if (s_kind_name_table.empty())
+  {
+    s_kind_name_table[GL_VERTEX_SHADER] = "vertex shader";
+    s_kind_name_table[GL_GEOMETRY_SHADER] = "geometry shader";
+    s_kind_name_table[GL_FRAGMENT_SHADER] = "fragment shader";
+  }
+  return s_kind_name_table;
+}
 }

@@ -6,6 +6,9 @@
 #include "io.h"
 #include "glapplication.h"
 
+
+namespace opengl
+{
 GLApplication& GLApplication::instance()
 {
   static GLApplication app;
@@ -75,13 +78,13 @@ void GLApplication::create_scene()
       io::load_src("shaders\\simple_color.vert", vs_code);
       io::load_src("shaders\\simple_color.frag", fs_code);
 
-      opengl::shader_program& prog = m_shader_manager.add("simple_color");
+      shader_program& prog = m_shader_manager.add("simple_color");
       prog.add_vertex_shader(vs_code);
       prog.add_fragment_shader(fs_code);
       prog.link();
 
-      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
-      prog.set_attribute_loc(opengl::shader_program::color_attribute, 1);
+      prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
+      prog.set_attribute_location(shader_program::attribute_kind::color, 1);
     }
 
     {
@@ -89,13 +92,13 @@ void GLApplication::create_scene()
       io::load_src("shaders\\per_pixel_diffuse.vert", vs_code);
       io::load_src("shaders\\per_pixel_diffuse.frag", fs_code);
 
-      opengl::shader_program& prog = m_shader_manager.add("per_pixel_diffuse");
+      shader_program& prog = m_shader_manager.add("per_pixel_diffuse");
       prog.add_vertex_shader(vs_code);
       prog.add_fragment_shader(fs_code);
       prog.link();
 
-      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
-      prog.set_attribute_loc(opengl::shader_program::uv_attribute, 1);
+      prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
+      prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
       prog.set_need_texture(true);  // TODO: pass here...
     }
 
@@ -105,14 +108,14 @@ void GLApplication::create_scene()
       io::load_src("shaders\\normal_visualize.geom", gs_code);
       io::load_src("shaders\\normal_visualize.frag", fs_code);
 
-      opengl::shader_program& prog = m_shader_manager.add("normal_visualize");
+      shader_program& prog = m_shader_manager.add("normal_visualize");
       prog.add_vertex_shader(vs_code);
       prog.add_geometry_shader(gs_code);
       prog.add_fragment_shader(fs_code);
       prog.link();
 
-      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
-      prog.set_attribute_loc(opengl::shader_program::uv_attribute, 1);
+      prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
+      prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
       prog.set_need_normal_matrix(true);
       //prog.set_need_texture(true);  // TODO: pass here...
     }
@@ -149,6 +152,11 @@ void GLApplication::create_scene()
       vec3(0.0f, 0.0f, len)
     };
 
+    std::vector<unsigned> indices
+    {
+      0, 1, 2, 3, 4, 5
+    };
+
     std::vector<vec3> colors
     {
       vec3(1.0f, 0.0f, 0.0f),
@@ -159,16 +167,9 @@ void GLApplication::create_scene()
       vec3(0.0f, 0.0f, 1.0f)
     };
 
-    std::vector<unsigned> indices
-    {
-      0, 1, 2, 3, 4, 5
-    };
-
-    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh(GL_LINES)));
-    opengl::mesh::ptr mesh = m_meshes.back();
-    mesh->add_vertices(vertices);
+    m_meshes.push_back(mesh::ptr(new mesh(vertices, indices, GL_LINES)));
+    mesh::ptr mesh = m_meshes.back();
     mesh->add_colors(colors);
-    mesh->add_indices(indices);
   }
 
   // create model mesh
@@ -187,12 +188,10 @@ void GLApplication::create_scene()
                                     2, 1, 3 };
 
     {
-      m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh(GL_TRIANGLES)));
-      opengl::mesh::ptr mesh = m_meshes.back();
+      m_meshes.push_back(mesh::ptr(new mesh(vertices, indices, GL_TRIANGLES)));
+      mesh::ptr mesh = m_meshes.back();
       
-      mesh->add_vertices(vertices);
       mesh->add_uvs(uvs);
-      mesh->add_indices(indices);
       mesh->set_texture(m_height_map_texture_id);
       mesh->set_transform(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
     }
@@ -235,6 +234,8 @@ void GLApplication::update_projection()
 void GLApplication::destroy_scene() noexcept
 {
   m_meshes.clear();
+  m_shader_manager.clear();
+  glDeleteTextures(1, &m_height_map_texture_id);
 }
 
 // static
@@ -282,6 +283,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
     }
     case 27:
     {
+      app.destroy_scene();
       exit(0);
       break;
     }
@@ -312,8 +314,4 @@ void GLApplication::reshape_callback(int w, int h)
   glViewport(0, 0, instance().m_window_size.x, instance().m_window_size.y);
   instance().update_projection();
 }
-
-void GLApplication::terminate()
-{
-  instance().destroy_scene();
 }

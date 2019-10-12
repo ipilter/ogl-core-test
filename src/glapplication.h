@@ -9,11 +9,12 @@
 // ideas from
 // https://open.gl/content/code/c2_triangle_elements.txt
 
+namespace opengl
+{
 class GLApplication
 {
 public:
   static GLApplication& instance();
-  static void terminate();
 
 public:
   void init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version);
@@ -35,9 +36,9 @@ private:
   bool m_render_axis;
   bool m_render_normals;
 
-  std::vector<opengl::mesh::ptr> m_meshes;
+  std::vector<mesh::ptr> m_meshes;
 
-  opengl::shader_manager m_shader_manager;
+  shader_manager m_shader_manager;
 
   unsigned m_height_map_texture_id;
 
@@ -52,3 +53,4 @@ private:
   GLApplication();
   ~GLApplication();
 };
+}

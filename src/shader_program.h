@@ -15,12 +15,16 @@ class shader_program
 public:
   using ptr = std::shared_ptr<shader_program>;
 
-  enum AttributeKind
+  struct attribute_kind
   {
-    vertex_attribute
-    , color_attribute
-    , normal_attribute
-    , uv_attribute
+    enum Enum
+    {
+      vertex
+      , color
+      , normal
+      , uv
+      , count
+    };
   };
 
   static unsigned invalid_attribute_location();
@@ -36,8 +40,8 @@ public:
   void add_fragment_shader(const std::string& src);
   void link();
 
-  void set_attribute_loc(const AttributeKind, const unsigned location);
-  unsigned get_attribute_loc(const AttributeKind) const;
+  void set_attribute_location(const attribute_kind::Enum, const unsigned location);
+  unsigned attribute_location(const attribute_kind::Enum) const;
 
   void set_need_normal_matrix(const bool v);
   bool need_normal_matrix() const;
@@ -60,35 +64,25 @@ public:
 
 private:
   unsigned add_shader(const unsigned shader_kind, const std::string& src);
-
   void compile(const unsigned shader_id);
-
-private:
   int getUniformLoc(const std::string& name) const;
 
+private:
   unsigned m_program;
   unsigned m_vertex_shader;
   unsigned m_fragment_shader;
   unsigned m_geometry_shader;
 
   std::map<unsigned, unsigned> m_id_kind_table;
-  std::map<AttributeKind, unsigned> m_attribute_table;
+  std::map<attribute_kind::Enum, unsigned> m_attribute_location_table;
 
   bool m_need_normal_matrix;
   bool m_need_texture;
 
-  static std::unordered_map<unsigned, std::string>& kind_name_table()
-  {
-    static std::unordered_map<unsigned, std::string> s_kind_name_table;
-    if (s_kind_name_table.empty())
-    {
-      s_kind_name_table[GL_VERTEX_SHADER] = "vertex shader";
-      s_kind_name_table[GL_GEOMETRY_SHADER] = "geometry shader";
-      s_kind_name_table[GL_FRAGMENT_SHADER] = "fragment shader";
-    }
-    return s_kind_name_table;
-  }
+private:
+  static std::unordered_map<unsigned, std::string>& kind_name_table();
 
+private:
   shader_program(const shader_program&) {};
   shader_program& operator = (const shader_program&) {};
 };
