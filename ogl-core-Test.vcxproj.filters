@@ -73,6 +73,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\normal_visualize.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\normal_visualize.geom">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\normal_visualize.vert">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="shaders\per_pixel_diffuse.frag">
       <Filter>shaders</Filter>
     </None>
@@ -83,15 +92,6 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\simple_color.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\vertex_normal.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\vertex_normal.geom">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\vertex_normal.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

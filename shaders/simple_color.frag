@@ -1,5 +1,5 @@
 // frag sc
-#version 450 core
+#version 330 core
 
 in vec3 fragmentColor;
 

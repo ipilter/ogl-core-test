@@ -1,8 +1,9 @@
 #pragma once
 
+#include <ppm.h>
+
 #include "types.h"
 #include "io.h"
-
 #include "glapplication.h"
 
 GLApplication& GLApplication::instance()
@@ -16,6 +17,7 @@ GLApplication::GLApplication()
   , m_projection(1)
   , m_view(1)
   , m_render_axis(true)
+  , m_render_normals(false)
 {}
 
 GLApplication::~GLApplication()
@@ -59,18 +61,80 @@ void GLApplication::create_scene()
 {
   // camera
   {
-    vec3 world_up = vec3(0, 1, 0);
-    vec3 eye(0.0f, 2.0f, 3.0f);
-    vec3 target(0.0f, 0.0f, 0.0f);
-    vec3 up = world_up;
+    vec3 eye(3.5f, 6.0f, -2.0f);
+    vec3 target(3.5f, 0.0f, 2.0f);
+    vec3 up = world_up();
+
     m_view = glm::lookAt(eye, target, up);
   }
 
   // shaders
-  m_shader_manager.create("simple_color", "shaders\\simple_color.vert", "shaders\\simple_color.frag");
-  m_shader_manager.create("per_pixel_diffuse", "shaders\\per_pixel_diffuse.vert", "shaders\\per_pixel_diffuse.frag");
-  m_shader_manager.create("vertex_normal", "shaders\\vertex_normal.vert", "shaders\\vertex_normal.geom", "shaders\\vertex_normal.frag");  // todo layout number does not match with the vertex attrib loc!!
-  // maybe shader code can be the stronger and dictate which data is placed on which location. And before render assign the given data type to the location given by the shader program..
+  {
+    {
+      std::string vs_code, fs_code;
+      io::load_src("shaders\\simple_color.vert", vs_code);
+      io::load_src("shaders\\simple_color.frag", fs_code);
+
+      opengl::shader_program& prog = m_shader_manager.add("simple_color");
+      prog.add_vertex_shader(vs_code);
+      prog.add_fragment_shader(fs_code);
+      prog.link();
+
+      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
+      prog.set_attribute_loc(opengl::shader_program::color_attribute, 1);
+    }
+
+    {
+      std::string vs_code, fs_code;
+      io::load_src("shaders\\per_pixel_diffuse.vert", vs_code);
+      io::load_src("shaders\\per_pixel_diffuse.frag", fs_code);
+
+      opengl::shader_program& prog = m_shader_manager.add("per_pixel_diffuse");
+      prog.add_vertex_shader(vs_code);
+      prog.add_fragment_shader(fs_code);
+      prog.link();
+
+      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
+      prog.set_attribute_loc(opengl::shader_program::uv_attribute, 1);
+      prog.set_need_texture(true);  // TODO: pass here...
+    }
+
+    {
+      std::string vs_code, gs_code, fs_code;
+      io::load_src("shaders\\normal_visualize.vert", vs_code);
+      io::load_src("shaders\\normal_visualize.geom", gs_code);
+      io::load_src("shaders\\normal_visualize.frag", fs_code);
+
+      opengl::shader_program& prog = m_shader_manager.add("normal_visualize");
+      prog.add_vertex_shader(vs_code);
+      prog.add_geometry_shader(gs_code);
+      prog.add_fragment_shader(fs_code);
+      prog.link();
+
+      prog.set_attribute_loc(opengl::shader_program::vertex_attribute, 0);
+      prog.set_attribute_loc(opengl::shader_program::uv_attribute, 1);
+      prog.set_need_normal_matrix(true);
+      //prog.set_need_texture(true);  // TODO: pass here...
+    }
+  }
+
+  // texture
+  {
+    glGenTextures(1, &m_height_map_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_height_map_texture_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    const int width = 2, height = 2;
+    float pixels[] = { 0.2f, 0.4f,
+                       0.6f, 0.8f };
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RED, GL_FLOAT, pixels);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
 
   // create axis mesh
   {
@@ -100,46 +164,38 @@ void GLApplication::create_scene()
       0, 1, 2, 3, 4, 5
     };
 
-    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh()));
-    m_meshes[0]->create(vertices, colors, indices);
-    m_meshes[0]->set_primitive_type(GL_LINES);
+    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh(GL_LINES)));
+    opengl::mesh::ptr mesh = m_meshes.back();
+    mesh->add_vertices(vertices);
+    mesh->add_colors(colors);
+    mesh->add_indices(indices);
   }
 
   // create model mesh
   {
-    std::vector<vec3> vertices
-    {
-      vec3(0.0f, 0.0f, 0.0f),
-      vec3(1.0f, 0.0f, 0.0f),
-      vec3(0.0f, 0.0f, 1.0f),
-      vec3(1.0f, 0.0f, 1.0f)
-    };
+    std::vector<vec3> vertices { vec3(0.0f, 0.0f, 0.0f),
+                                 vec3(0.0f, 0.0f, 1.0f),
+                                 vec3(1.0f, 0.0f, 0.0f),
+                                 vec3(1.0f, 0.0f, 1.0f) };
 
-    std::vector<vec3> colors
-    {
-      vec3(1.0f, 0.0f, 0.0f),
-      vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 0.0f, 1.0f),
-      vec3(1.0f, 1.0f, 1.0f)
-    };
+    std::vector<vec2> uvs { vec2(0.0f, 0.0f),
+                            vec2(1.0f, 0.0f),
+                            vec2(0.0f, 1.0f),
+                            vec2(1.0f, 1.0f) };
 
-    std::vector<vec3> normals
-    {
-      vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 1.0f, 0.0f),
-      vec3(0.0f, 1.0f, 0.0f)
-    };
+    std::vector<unsigned> indices { 0, 1, 2,
+                                    2, 1, 3 };
 
-    std::vector<unsigned> indices
     {
-      0, 1, 2,
-      2, 1, 3
-    };
-
-    m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh()));
-    m_meshes[1]->create(vertices, colors, normals, indices);
-    m_meshes[1]->set_primitive_type(GL_TRIANGLES);
+      m_meshes.push_back(opengl::mesh::ptr(new opengl::mesh(GL_TRIANGLES)));
+      opengl::mesh::ptr mesh = m_meshes.back();
+      
+      mesh->add_vertices(vertices);
+      mesh->add_uvs(uvs);
+      mesh->add_indices(indices);
+      mesh->set_texture(m_height_map_texture_id);
+      mesh->set_transform(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
+    }
   }
 }
 
@@ -153,11 +209,17 @@ void GLApplication::render()
 
   if (m_render_axis)
   {
-    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection, m_view);
+    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection * m_view);
   }
 
-  m_meshes[1]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection, m_view);
-  m_meshes[1]->render(m_shader_manager.get("vertex_normal"), m_projection, m_view);
+  for (size_t i = 1; i < m_meshes.size(); ++i)
+  {
+    if (m_render_normals)
+    {
+      m_meshes[i]->render(m_shader_manager.get("normal_visualize"), m_projection * m_view);
+    }
+    m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+  }
 }
 
 void GLApplication::request_update()
@@ -175,14 +237,18 @@ void GLApplication::destroy_scene() noexcept
   m_meshes.clear();
 }
 
-void GLApplication::flip_axis()
+// static
+const vec3& GLApplication::world_up()
 {
-  m_render_axis = !m_render_axis;
+  static const vec3 world_up(0.0f, 1.0f, 0.0f);
+  return world_up;
 }
 
-// static
+// callbacks
 void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*y*/)
 {
+  GLApplication& app = instance();
+  
   bool need_redraw(false);
   switch (character)
   {
@@ -200,12 +266,18 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
     }
     case 'a':
     {
-      instance().flip_axis();
+      app.m_render_axis = !app.m_render_axis;
       need_redraw = true;
       break;
     }
     case 'v':
     {
+      break;
+    }
+    case 'n':
+    {
+      app.m_render_normals = !app.m_render_normals;
+      need_redraw = true;
       break;
     }
     case 27:
@@ -215,6 +287,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
     }
     case 32:
     {
+      need_redraw = true;
       break;
     }
   }

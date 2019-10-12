@@ -11,75 +11,42 @@ shader_manager::shader_manager()
 { }
 
 shader_manager::~shader_manager()
-{
-  remove_all();
-}
+{ }
 
-void shader_manager::create(const std::string& name
-                            , const std::string& vsFileName
-                            , const std::string& fsFileName)
+shader_program& shader_manager::add(const std::string& name)
 {
   if (m_shader_programs.find(name) != m_shader_programs.end())
   {
     std::stringstream ss;
-    ss << "Shader program with name [";
-    ss << name;
-    ss << "] already exist!";
+    ss << "Shader program [" << name << "] already exist!";
     throw std::runtime_error(ss.str());
   }
 
-  std::string vs, fs;
-  io::load_src(vsFileName, vs);
-  io::load_src(fsFileName, fs);
-  shader_program::ptr program(new shader_program(vs, fs));
-
+  shader_program::ptr program(new shader_program());
   if (program == nullptr)
   {
     throw std::runtime_error("out of memory");
   }
 
   m_shader_programs[name] = program;
+  return *program;
 }
 
-void shader_manager::create(const std::string& name
-                            , const std::string& vsFileName
-                            , const std::string& gsFileName
-                            , const std::string& fsFileName)
-{
-  if (m_shader_programs.find(name) != m_shader_programs.end())
-  {
-    std::stringstream ss;
-    ss << "Shader program with name [";
-    ss << name;
-    ss << "] already exist!";
-    throw std::runtime_error(ss.str());
-  }
-
-  std::string vs, gs, fs;
-  io::load_src(vsFileName, vs);
-  io::load_src(fsFileName, fs);
-  io::load_src(gsFileName, gs);
-  shader_program::ptr program(new shader_program(vs, gs, fs));
-
-  if (program == nullptr)
-  {
-    throw std::runtime_error("out of memory");
-  }
-
-  m_shader_programs[name] = program;
-}
-
-void shader_manager::remove_all (void)
+void shader_manager::clear(void)
 {
   m_shader_programs.clear ();
 }
 
 void shader_manager::remove(const std::string& name)
 {
-  if (m_shader_programs.find(name) != m_shader_programs.end())
+  const auto it = m_shader_programs.find(name);
+  if (it == m_shader_programs.end())
   {
-    m_shader_programs.erase(name);
+    std::stringstream ss;
+    ss << "Shader program [" << name << "] does not exist!";
+    throw std::runtime_error (ss.str ());
   }
+  m_shader_programs.erase(it);
 }
 
 const shader_program& shader_manager::get(const std::string& name) const
@@ -88,12 +55,9 @@ const shader_program& shader_manager::get(const std::string& name) const
   if (it == m_shader_programs.end())
   {
     std::stringstream ss;
-    ss << "Shader program with name [";
-    ss << name;
-    ss << "] does not exist!";
+    ss << "Shader program [" << name << "] does not exist!";
     throw std::runtime_error (ss.str ());
   }
-
   return *it->second;
 }
-};
+}

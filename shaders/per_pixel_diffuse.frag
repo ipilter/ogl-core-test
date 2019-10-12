@@ -1,11 +1,20 @@
-// per pixel diffuse fragment
-#version 450 core
+// frag ppd
+#version 330 core
 
-in vec3 fragmentColor;
 
-out vec3 color;
+// calculate the normal in geom shader and pass it here
+
+uniform sampler2D height_map;
+
+in shader_data
+{
+  vec2 uv;
+} vs_out;
+
+out vec4 color;
 
 void main()
 {
-  color = fragmentColor;
+  float height = texture(height_map, vs_out.uv).x;
+  color = vec4(height, height, height, 1.0);
 }
