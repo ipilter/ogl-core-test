@@ -179,13 +179,13 @@ void GLApplication::create_scene()
                                  vec3(1.0f, 0.0f, 0.0f),
                                  vec3(1.0f, 0.0f, 1.0f) };
 
+    std::vector<unsigned> indices { 0, 1, 2,
+                                    2, 1, 3 };
+
     std::vector<vec2> uvs { vec2(0.0f, 0.0f),
                             vec2(1.0f, 0.0f),
                             vec2(0.0f, 1.0f),
                             vec2(1.0f, 1.0f) };
-
-    std::vector<unsigned> indices { 0, 1, 2,
-                                    2, 1, 3 };
 
     {
       m_meshes.push_back(mesh::ptr(new mesh(vertices, indices, GL_TRIANGLES)));
@@ -193,7 +193,7 @@ void GLApplication::create_scene()
       
       mesh->add_uvs(uvs);
       mesh->set_texture(m_height_map_texture_id);
-      mesh->set_transform(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
+      mesh->set_transformation(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
     }
   }
 }

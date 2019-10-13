@@ -11,7 +11,7 @@ namespace opengl
 mesh::mesh(const std::vector<vec3>& vertices, const std::vector<unsigned>& indices, const unsigned primitive_type)
   : m_primitive_type(primitive_type)
   , m_primitive_count(0)
-  , m_model_transform(1)
+  , m_transformation(1)
   , m_vertex_array_id(0)
   , m_vertex_buffer_id(0)
   , m_color_buffer_id(0)
@@ -70,27 +70,27 @@ void mesh::set_texture(const unsigned texture_id)
   m_texture_id = texture_id;
 }
 
-void mesh::set_transform(const mat4& m)
+void mesh::set_transformation(const mat4& m)
 {
-  m_model_transform = m;
+  m_transformation = m;
 }
 
-const mat4& mesh::get_transform() const
+const mat4& mesh::get_transformation() const
 {
-  return m_model_transform;
+  return m_transformation;
 }
 
 void mesh::render(const shader_program& shader_program, const mat4& view_projection)
 {
   glBindVertexArray(m_vertex_array_id);
 
-  const unsigned buff[] = { m_vertex_buffer_id, m_color_buffer_id, m_normal_buffer_id, m_uv_buffer_id };
-  const unsigned buffer_data_size[] = { 3, 3, 3, 2 }; // buffer element size
+  const unsigned buff[] = { m_vertex_buffer_id, m_color_buffer_id, m_normal_buffer_id, m_uv_buffer_id }; // buffers
+  const unsigned buffer_data_size[] = { 3, 3, 3, 2 }; // buffer element sizes
 
   // vertex is a must
   enable_vertex_attribute(shader_program.attribute_location(shader_program::attribute_kind::vertex), buff[0], buffer_data_size[0]);
 
-  // aditional vertex data
+  // additional vertex data
   for(unsigned kind = shader_program::attribute_kind::color; kind < shader_program::attribute_kind::count; ++kind)
   { 
     const unsigned attribute_location = shader_program.attribute_location(shader_program::attribute_kind::Enum(kind));
@@ -101,18 +101,18 @@ void mesh::render(const shader_program& shader_program, const mat4& view_project
   }
 
   glUseProgram(shader_program.id());
-  shader_program.setUniformMatrix4fv("model_view_projection_matrix", view_projection * m_model_transform);
+  shader_program.setUniformMatrix4fv("model_view_projection_matrix", view_projection * m_transformation);
+
   if (shader_program.need_normal_matrix())
   {
-    shader_program.setUniformMatrix4fv("normal_matrix", glm::transpose(glm::inverse(m_model_transform)));
+    shader_program.setUniformMatrix4fv("normal_matrix", glm::transpose(glm::inverse(m_transformation)));
   }
 
   if (m_texture_id && shader_program.need_texture())
   {
-    shader_program.setUniform1i("height_map", 0); // TODO: 0 texture slot is used for the texture, store it instead
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
+    shader_program.setUniform1i("height_map", 0); // TODO: 0 texture slot is used for the texture, store it instead
   }
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer_id);

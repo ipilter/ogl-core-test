@@ -23,8 +23,8 @@ public:
   void add_normals(const std::vector<vec3>& buffer);
   void add_uvs(const std::vector<vec2>& buffer);
   void set_texture(const unsigned texture_id);
-  void set_transform(const mat4& m);
-  const mat4& get_transform() const;
+  void set_transformation(const mat4& m);
+  const mat4& get_transformation() const;
 
 private:
   void enable_vertex_attribute(const unsigned attribute_location, const unsigned buffer_id, const unsigned size);
@@ -44,7 +44,7 @@ private:
   unsigned m_primitive_type;
   unsigned m_primitive_count;
 
-  mat4 m_model_transform;
+  mat4 m_transformation;
 
   // TODO array instead these..
   unsigned m_vertex_array_id;
