@@ -6,15 +6,24 @@
 #include "io.h"
 #include "shader_manager.h"
 
-// ideas from
-// https://open.gl/content/code/c2_triangle_elements.txt
-
 namespace opengl
 {
 class GLApplication
 {
 public:
   static GLApplication& instance();
+
+public:
+  struct draw_mode
+  {
+    enum Enum
+    {
+      shaded
+      , shaded_wireframe
+      , wireframe
+      , count
+    };
+  };
 
 public:
   void init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version);
@@ -34,6 +43,7 @@ private:
   mat4 m_view;
 
   bool m_render_axis;
+  draw_mode::Enum m_draw_mode;
   bool m_render_normals;
 
   std::vector<mesh::ptr> m_meshes;

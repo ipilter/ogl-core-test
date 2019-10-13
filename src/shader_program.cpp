@@ -4,7 +4,6 @@
 
 namespace opengl
 {
-
 shader_program::shader_program()
   : m_program(glCreateProgram())
   , m_vertex_shader(0)
@@ -229,13 +228,12 @@ void shader_program::setUniform4fv(const std::string& name, const unsigned count
 
 std::unordered_map<unsigned, std::string>& shader_program::kind_name_table()
 {
-  static std::unordered_map<unsigned, std::string> s_kind_name_table;
-  if (s_kind_name_table.empty())
+  static std::unordered_map<unsigned, std::string> s_kind_name_table =
   {
-    s_kind_name_table[GL_VERTEX_SHADER] = "vertex shader";
-    s_kind_name_table[GL_GEOMETRY_SHADER] = "geometry shader";
-    s_kind_name_table[GL_FRAGMENT_SHADER] = "fragment shader";
-  }
+    { GL_VERTEX_SHADER, "vertex shader" },
+    { GL_GEOMETRY_SHADER, "geometry shader" },
+    { GL_FRAGMENT_SHADER, "fragment shader" }
+  };
   return s_kind_name_table;
 }
 }

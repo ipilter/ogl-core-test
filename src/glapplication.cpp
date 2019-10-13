@@ -6,7 +6,6 @@
 #include "io.h"
 #include "glapplication.h"
 
-
 namespace opengl
 {
 GLApplication& GLApplication::instance()
@@ -20,6 +19,7 @@ GLApplication::GLApplication()
   , m_projection(1)
   , m_view(1)
   , m_render_axis(true)
+  , m_draw_mode(draw_mode::shaded)
   , m_render_normals(false)
 {}
 
@@ -85,6 +85,21 @@ void GLApplication::create_scene()
 
       prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
       prog.set_attribute_location(shader_program::attribute_kind::color, 1);
+    }
+
+    {
+      std::string vs_code, gs_code, fs_code;
+      io::load_src("shaders\\wireframe.vert", vs_code);
+      io::load_src("shaders\\wireframe.geom", gs_code);
+      io::load_src("shaders\\wireframe.frag", fs_code);
+
+      shader_program& prog = m_shader_manager.add("wireframe");
+      prog.add_vertex_shader(vs_code);
+      prog.add_geometry_shader(gs_code);
+      prog.add_fragment_shader(fs_code);
+      prog.link();
+
+      prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
     }
 
     {
@@ -217,7 +232,20 @@ void GLApplication::render()
     {
       m_meshes[i]->render(m_shader_manager.get("normal_visualize"), m_projection * m_view);
     }
-    m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+
+    if (m_draw_mode == draw_mode::shaded)
+    {
+      m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+    }
+    else if(m_draw_mode == draw_mode::shaded_wireframe)
+    {
+      m_meshes[i]->render(m_shader_manager.get("wireframe"), m_projection * m_view);
+      m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+    }
+    else if (m_draw_mode == draw_mode::wireframe)
+    {
+      m_meshes[i]->render(m_shader_manager.get("wireframe"), m_projection * m_view);
+    }
   }
 }
 
@@ -278,6 +306,16 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
     case 'n':
     {
       app.m_render_normals = !app.m_render_normals;
+      need_redraw = true;
+      break;
+    }
+    case 'd':
+    {
+      app.m_draw_mode = static_cast<draw_mode::Enum>(app.m_draw_mode + 1);
+      if (app.m_draw_mode == draw_mode::count)
+      {
+        app.m_draw_mode = static_cast<draw_mode::Enum>(0);
+      }
       need_redraw = true;
       break;
     }

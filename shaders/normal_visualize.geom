@@ -1,4 +1,4 @@
-// geom norm viz
+// geom nv
 #version 330 core
 
 layout (triangles) in;

@@ -1,10 +1,8 @@
-// vert ppd
+// vert nv
 #version 330 core
 
 layout(location = 0) in vec3 vertex_position_modelspace;
 layout(location = 1) in vec2 vertex_uv;
-
-uniform mat4 model_view_projection_matrix;
 
 uniform sampler2D height_map;
 

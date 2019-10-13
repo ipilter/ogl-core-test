@@ -7,7 +7,6 @@
 
 namespace opengl
 {
-
 mesh::mesh(const std::vector<vec3>& vertices, const std::vector<unsigned>& indices, const unsigned primitive_type)
   : m_primitive_type(primitive_type)
   , m_primitive_count(0)

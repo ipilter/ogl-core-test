@@ -94,5 +94,14 @@
     <None Include="shaders\simple_color.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\wireframe.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\wireframe.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\wireframe.geom">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
