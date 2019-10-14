@@ -19,10 +19,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\glapplication.h" />
+    <ClInclude Include="src\height_field.h" />
     <ClInclude Include="src\io.h" />
-    <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\projection.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\opengl.h" />
+    <ClInclude Include="src\range.h" />
+    <ClInclude Include="src\range_mapper.h" />
     <ClInclude Include="src\shader_manager.h" />
     <ClInclude Include="src\shader_program.h" />
     <ClInclude Include="src\types.h" />

@@ -28,6 +28,9 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{ec046ae4-1595-4263-aebb-784782e5a112}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\terrain">
+      <UniqueIdentifier>{82164bcc-ca4a-4b63-8d96-78adf58d9752}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mesh.cpp">
@@ -62,14 +65,23 @@
     <ClInclude Include="src\io.h">
       <Filter>Header Files\io</Filter>
     </ClInclude>
-    <ClInclude Include="src\math.h">
-      <Filter>Header Files\math</Filter>
-    </ClInclude>
     <ClInclude Include="src\glapplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\types.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projection.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\range.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\range_mapper.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\height_field.h">
+      <Filter>Header Files\terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

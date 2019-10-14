@@ -1,10 +1,11 @@
 #pragma once
 
-#include <ppm.h>
-
 #include "types.h"
 #include "io.h"
 #include "glapplication.h"
+#include "range.h"
+#include "range_mapper.h"
+#include "height_field.h"
 
 namespace opengl
 {
@@ -66,12 +67,20 @@ void GLApplication::run()
 
 void GLApplication::create_scene()
 {
-  m_background_color = vec3(0.1, 0.1, 0.1);
+  m_background_color = vec3(0.15, 0.15, 0.15);
+
+  // height filed
+  float height_field_pixels[] = { 0.0f, 0.1f, 0.2f, 0.3f,
+                                  0.4f, 0.5f, 0.6f, 0.7f,
+                                  0.8f, 0.9f, 1.0f, 0.9f,
+                                  0.8f, 0.7f, 0.6f, 0.5f };
+
+  terrain::height_field height_field(4, 4, vec2(2.0, 2.0), height_field_pixels);
 
   // camera
   {
-    vec3 eye(3.5f, 6.0f, -2.0f);
-    vec3 target(3.5f, 0.0f, 2.0f);
+    vec3 eye(3.0f, 3.0f, -1.0f);
+    vec3 target(3.0f, 1.0f, 1.0f);
     vec3 up = world_up();
 
     m_view = glm::lookAt(eye, target, up);
@@ -142,7 +151,7 @@ void GLApplication::create_scene()
     }
   }
 
-  // texture
+  // height field texture
   {
     glGenTextures(1, &m_height_map_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_height_map_texture_id);
@@ -152,11 +161,7 @@ void GLApplication::create_scene()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    const int width = 2, height = 2;
-    float pixels[] = { 0.2f, 0.4f,
-                       0.6f, 0.8f };
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RED, GL_FLOAT, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, height_field.width(), height_field.height(), 0, GL_RED, GL_FLOAT, height_field.data());
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
@@ -194,23 +199,72 @@ void GLApplication::create_scene()
 
   // create terrain mesh
   {
-    std::vector<vec3> vertices { vec3(0.0f, 0.0f, 0.0f),
-                                 vec3(0.0f, 0.0f, 1.0f),
-                                 vec3(1.0f, 0.0f, 0.0f),
-                                 vec3(1.0f, 0.0f, 1.0f) };
+    // create grid
+    // 2x2 pixel -> 4 vertex
+    //                       ^
+    //                       |
+    //                       z
+    //     -------------------
+    //     |3       |2       |
+    //     |        |        |
+    //     |        |        |
+    //     ---------*--------*
+    //     |1       |0       |
+    //     |        |        |
+    //     |        |        |
+    // <-x----------*--------*
+    const unsigned j_max(height_field.height());
+    const unsigned i_max(height_field.width());
 
-    std::vector<unsigned> indices { 0, 1, 2,
-                                    2, 1, 3 };
+    std::vector<vec3> vertices;
+    vertices.reserve(i_max * j_max);
+    std::vector<vec2> uvs;
+    uvs.reserve(i_max * j_max);
 
-    std::vector<vec2> uvs { vec2(0.0f, 0.0f),
-                            vec2(1.0f, 0.0f),
-                            vec2(0.0f, 1.0f),
-                            vec2(1.0f, 1.0f) };
+    math::range_mapper<unsigned, float> rmi(0, i_max - 1, 0.0f, 1.0f);
+    math::range_mapper<unsigned, float> rmj(0, j_max - 1, 0.0f, 1.0f);
+    for (auto j : math::range(0, j_max))
+    {
+      for (auto i : math::range(0, i_max))
+      {
+        vertices.push_back(vec3(i * height_field.resolution().s, 0.0, j * height_field.resolution().t));
+        uvs.push_back(vec2(rmi.map(i), rmj.map(j)));
+      }
+    }
+
+    // 2x2 pixel -> 2 triangle
+    // 0, 2, 1
+    // 1, 2, 3
+    //                     ^
+    //                     |
+    //                     z
+    //     -----------------
+    //     |3      |2      |
+    //     |       |       |
+    //     |      3|      2|
+    //     --------*-------*
+    //     |1      |0     /|
+    //     |       |   /   |
+    //     |      1|/     0|
+    // <-x---------*-------*
+    std::vector<unsigned> indices;
+    for (auto j = 0u, j_next = 1u; j_next < j_max; ++j, ++j_next)
+    {
+      for (auto i = 0u, i_next = 1u; i_next < i_max; ++i, ++i_next)
+      {
+        indices.push_back(i + i_max * j);
+        indices.push_back(i + i_max * j_next);
+        indices.push_back(i_next + i_max * j);
+
+        indices.push_back(i_next + i_max * j);
+        indices.push_back(i + i_max * j_next);
+        indices.push_back(i_next + i_max * j_next);
+      }
+    }
 
     {
       m_meshes.push_back(mesh::ptr(new mesh(vertices, indices, GL_TRIANGLES)));
       mesh::ptr mesh = m_meshes.back();
-      
       mesh->add_uvs(uvs);
       mesh->set_texture(m_height_map_texture_id);
       mesh->set_transformation(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
