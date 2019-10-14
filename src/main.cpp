@@ -6,7 +6,6 @@
 
 int main(int argc, char* argv[])
 {
-  int ret = 0;
   try
   {
     opengl::GLApplication& app(opengl::GLApplication::instance());
@@ -17,5 +16,5 @@ int main(int argc, char* argv[])
   {
     std::cout << "Error: " << e.what() << std::endl;
   }
-  return ret;
+  return 0;
 }

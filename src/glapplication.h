@@ -42,16 +42,17 @@ private:
   mat4 m_projection;
   mat4 m_view;
 
+  // scene
   bool m_render_axis;
   draw_mode::Enum m_draw_mode;
   bool m_render_normals;
-
+  mesh::ptr m_axis;
   std::vector<mesh::ptr> m_meshes;
-
   shader_manager m_shader_manager;
-
   unsigned m_height_map_texture_id;
+  vec3 m_background_color;
 
+private:
   static const vec3& world_up();
 
 private:

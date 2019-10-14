@@ -21,6 +21,7 @@ GLApplication::GLApplication()
   , m_render_axis(true)
   , m_draw_mode(draw_mode::shaded)
   , m_render_normals(false)
+  , m_background_color(0)
 {}
 
 GLApplication::~GLApplication()
@@ -49,6 +50,9 @@ void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const
 
   create_scene();
 
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+
   // glut callbacks
   glutReshapeFunc(reshape_callback);
   glutDisplayFunc(display_callback);
@@ -62,6 +66,8 @@ void GLApplication::run()
 
 void GLApplication::create_scene()
 {
+  m_background_color = vec3(0.1, 0.1, 0.1);
+
   // camera
   {
     vec3 eye(3.5f, 6.0f, -2.0f);
@@ -182,12 +188,11 @@ void GLApplication::create_scene()
       vec3(0.0f, 0.0f, 1.0f)
     };
 
-    m_meshes.push_back(mesh::ptr(new mesh(vertices, indices, GL_LINES)));
-    mesh::ptr mesh = m_meshes.back();
-    mesh->add_colors(colors);
+    m_axis.reset(new mesh(vertices, indices, GL_LINES));
+    m_axis->add_colors(colors);
   }
 
-  // create model mesh
+  // create terrain mesh
   {
     std::vector<vec3> vertices { vec3(0.0f, 0.0f, 0.0f),
                                  vec3(0.0f, 0.0f, 1.0f),
@@ -215,37 +220,29 @@ void GLApplication::create_scene()
 
 void GLApplication::render()
 {
-  glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+  glClearColor(m_background_color.x, m_background_color.y, m_background_color.z, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  for (const auto& mesh : m_meshes)
+  {
+    if (m_draw_mode == draw_mode::shaded || m_draw_mode == draw_mode::shaded_wireframe)
+    {
+      mesh->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+    }
+    if (m_draw_mode == draw_mode::wireframe || m_draw_mode == draw_mode::shaded_wireframe)
+    {
+      mesh->render(m_shader_manager.get("wireframe"), m_projection * m_view);
+    }
+
+    if (m_render_normals)
+    {
+      mesh->render(m_shader_manager.get("normal_visualize"), m_projection * m_view);
+    }
+  }
 
   if (m_render_axis)
   {
-    m_meshes[0]->render(m_shader_manager.get("simple_color"), m_projection * m_view);
-  }
-
-  for (size_t i = 1; i < m_meshes.size(); ++i)
-  {
-    if (m_render_normals)
-    {
-      m_meshes[i]->render(m_shader_manager.get("normal_visualize"), m_projection * m_view);
-    }
-
-    if (m_draw_mode == draw_mode::shaded)
-    {
-      m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
-    }
-    else if(m_draw_mode == draw_mode::shaded_wireframe)
-    {
-      m_meshes[i]->render(m_shader_manager.get("wireframe"), m_projection * m_view);
-      m_meshes[i]->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
-    }
-    else if (m_draw_mode == draw_mode::wireframe)
-    {
-      m_meshes[i]->render(m_shader_manager.get("wireframe"), m_projection * m_view);
-    }
+    m_axis->render(m_shader_manager.get("simple_color"), m_projection * m_view);
   }
 }
 
@@ -261,6 +258,7 @@ void GLApplication::update_projection()
 
 void GLApplication::destroy_scene() noexcept
 {
+  m_axis.reset();
   m_meshes.clear();
   m_shader_manager.clear();
   glDeleteTextures(1, &m_height_map_texture_id);
@@ -276,8 +274,8 @@ const vec3& GLApplication::world_up()
 // callbacks
 void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*y*/)
 {
-  GLApplication& app = instance();
-  
+  GLApplication& app(instance());
+
   bool need_redraw(false);
   switch (character)
   {
@@ -340,16 +338,18 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
 
 void GLApplication::display_callback()
 {
-  instance().render();
+  GLApplication& app(instance());
+  app.render();
   glutSwapBuffers();
 }
 
 void GLApplication::reshape_callback(int w, int h)
 {
-  instance().m_window_size.x = w > 1 ? w : 1;
-  instance().m_window_size.y = h > 1 ? h : 1;
+  GLApplication& app(instance());
+  app.m_window_size.x = w > 1 ? w : 1;
+  app.m_window_size.y = h > 1 ? h : 1;
+  app.update_projection();
 
-  glViewport(0, 0, instance().m_window_size.x, instance().m_window_size.y);
-  instance().update_projection();
+  glViewport(0, 0, app.m_window_size.x, app.m_window_size.y);
 }
 }
