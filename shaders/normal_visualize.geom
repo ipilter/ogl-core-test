@@ -17,7 +17,7 @@ void main()
     vec3 pprev = gl_in[i == 0                  ? gl_in.length() - 1 : i - 1].gl_Position.xyz;
     vec3 pnext = gl_in[i == gl_in.length() - 1 ?                  0 : i + 1].gl_Position.xyz;
 
-    vec3 normal = (cross(pnext-p, pprev-p));
+    vec3 normal = normalize((cross(pnext-p, pprev-p)));
 
     gl_Position =  model_view_projection_matrix * vec4(p, 1);
 
