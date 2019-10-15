@@ -118,7 +118,7 @@ bool shader_program::need_normal_matrix() const
   return m_need_normal_matrix;
 }
 
-void shader_program::set_need_texture(const bool v)
+void shader_program::set_need_height_field(const bool v)
 {
   m_need_texture = v;
 }

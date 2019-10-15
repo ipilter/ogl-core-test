@@ -5,6 +5,7 @@
 #include "types.h"
 #include "io.h"
 #include "shader_manager.h"
+#include "height_field.h"
 
 namespace opengl
 {
@@ -49,6 +50,7 @@ private:
   mesh::ptr m_axis;
   std::vector<mesh::ptr> m_meshes;
   shader_manager m_shader_manager;
+  terrain::height_field::ptr m_height_field;
   unsigned m_height_map_texture_id;
   vec3 m_background_color;
 

@@ -5,7 +5,6 @@
 #include "glapplication.h"
 #include "range.h"
 #include "range_mapper.h"
-#include "height_field.h"
 
 namespace opengl
 {
@@ -69,13 +68,21 @@ void GLApplication::create_scene()
 {
   m_background_color = vec3(0.15, 0.15, 0.15);
 
-  // height filed
-  float height_field_pixels[] = { 0.0f, 0.1f, 0.2f, 0.3f,
-                                  0.4f, 0.5f, 0.6f, 0.7f,
-                                  0.8f, 0.9f, 1.0f, 0.9f,
-                                  0.8f, 0.7f, 0.6f, 0.5f };
+  // height field
+  {
+    const unsigned w(50), h(50);
+    std::vector<float> height_field_pixels(w * h, 0.0f);
+    for (auto j = 0; j < h; ++j)
+    {
+      for (auto i = 0; i < w; ++i)
+      {
+        height_field_pixels[i + j * w] = 0.1f * sin((static_cast<float>(j) / h) * 20.0f) + 0.1f * cos((static_cast<float>(i) / w) * 20.0f);
+      }
+    }
 
-  terrain::height_field height_field(4, 4, vec2(2.0, 2.0), height_field_pixels);
+    m_height_field.reset(new terrain::height_field(w, h, vec2(0.1, 0.1), &height_field_pixels[0]));
+  }
+
 
   // camera
   {
@@ -115,6 +122,8 @@ void GLApplication::create_scene()
       prog.link();
 
       prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
+      prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
+      prog.set_need_height_field(true);  // TODO: pass here...
     }
 
     {
@@ -129,7 +138,7 @@ void GLApplication::create_scene()
 
       prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
       prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
-      prog.set_need_texture(true);  // TODO: pass here...
+      prog.set_need_height_field(true);  // TODO: pass here...
     }
 
     {
@@ -147,7 +156,7 @@ void GLApplication::create_scene()
       prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
       prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
       prog.set_need_normal_matrix(true);
-      //prog.set_need_texture(true);  // TODO: pass here...
+      prog.set_need_height_field(true);  // TODO: pass here...
     }
   }
 
@@ -156,12 +165,12 @@ void GLApplication::create_scene()
     glGenTextures(1, &m_height_map_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_height_map_texture_id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, height_field.width(), height_field.height(), 0, GL_RED, GL_FLOAT, height_field.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_height_field->width(), m_height_field->height(), 0, GL_RED, GL_FLOAT, m_height_field->data());
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
@@ -213,8 +222,8 @@ void GLApplication::create_scene()
     //     |        |        |
     //     |        |        |
     // <-x----------*--------*
-    const unsigned j_max(height_field.height());
-    const unsigned i_max(height_field.width());
+    const unsigned j_max(m_height_field->height());
+    const unsigned i_max(m_height_field->width());
 
     std::vector<vec3> vertices;
     vertices.reserve(i_max * j_max);
@@ -227,7 +236,7 @@ void GLApplication::create_scene()
     {
       for (auto i : math::range(0, i_max))
       {
-        vertices.push_back(vec3(i * height_field.resolution().s, 0.0, j * height_field.resolution().t));
+        vertices.push_back(vec3(i * m_height_field->resolution().s, 0.0, j * m_height_field->resolution().t));
         uvs.push_back(vec2(rmi.map(i), rmj.map(j)));
       }
     }
@@ -312,6 +321,7 @@ void GLApplication::update_projection()
 
 void GLApplication::destroy_scene() noexcept
 {
+  m_height_field.reset();
   m_axis.reset();
   m_meshes.clear();
   m_shader_manager.clear();

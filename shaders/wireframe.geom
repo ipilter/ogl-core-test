@@ -8,6 +8,11 @@ out vec3 vertex_color;
 
 uniform mat4 model_view_projection_matrix;
 
+in shader_data
+{
+  vec2 uv;
+} vs_out[];
+
 void main()
 {
   for(int i = 0; i < gl_in.length(); ++i)

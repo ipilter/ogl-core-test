@@ -9,12 +9,15 @@ namespace terrain
   class height_field
   {
   public:
+    using ptr = std::shared_ptr<height_field>;
+
+  public:
     height_field(const unsigned width, const unsigned height, const vec2& resolution, const float* data)
       : m_width(width)
       , m_height(height)
       , m_resolution(resolution)
     {
-      const auto count = m_width * m_width;
+      const auto count = m_width * height;
       m_data.reserve(count);
       m_data.insert(m_data.begin(), data, data + count);
     }

@@ -8,8 +8,6 @@ uniform sampler2D height_map;
 
 void main()
 {
-  //float height = texture(height_map, vertex_uv).x * 0.0001;
-
-  vec3 p = vertex_position_modelspace;
-  gl_Position = vec4(p, 1.0);
+  float height = texture(height_map, vertex_uv).x;
+  gl_Position = vec4(vertex_position_modelspace + vec3(0.0, height, 0.0), 1.0);
 }

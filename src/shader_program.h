@@ -45,7 +45,7 @@ public:
 
   void set_need_normal_matrix(const bool v);
   bool need_normal_matrix() const;
-  void set_need_texture(const bool v);
+  void set_need_height_field(const bool v);
   bool need_texture() const;
 
   void setUniform1i(const std::string& name, const unsigned value) const;
