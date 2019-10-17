@@ -48,6 +48,9 @@
     <ClCompile Include="src\glapplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\mesh.h">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="src\height_field.h">
       <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\camera.h">
+      <Filter>Header Files\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

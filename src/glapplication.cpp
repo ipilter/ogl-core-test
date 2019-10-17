@@ -15,13 +15,12 @@ GLApplication& GLApplication::instance()
 }
 
 GLApplication::GLApplication()
-  : m_window_size(0)
-  , m_projection(1)
-  , m_view(1)
-  , m_render_axis(true)
+  : m_render_axis(true)
   , m_draw_mode(draw_mode::shaded)
   , m_render_normals(false)
   , m_background_color(0)
+  , m_mouse_left_down(false)
+  , m_mouse_position(0.0)
 {}
 
 GLApplication::~GLApplication()
@@ -34,13 +33,13 @@ void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const
     throw std::runtime_error("missing parameter");
   }
 
-  m_window_size = window_size;
+  m_camera.set_window_size(window_size);
 
   glutInit(&argc, argv);
   glutInitContextVersion(opengl_version.x, opengl_version.y);
   glutInitContextProfile(GLUT_CORE_PROFILE);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-  glutInitWindowSize(m_window_size.x, m_window_size.y);
+  glutInitWindowSize(m_camera.window_size().x, m_camera.window_size().y);
   glutCreateWindow("gl");
 
   if (gl3wInit())
@@ -57,6 +56,8 @@ void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const
   glutReshapeFunc(reshape_callback);
   glutDisplayFunc(display_callback);
   glutKeyboardFunc(keyboard_callback);
+  glutMouseFunc(mouse_button_callback);
+  glutMotionFunc(mouse_move_callback);
 }
 
 void GLApplication::run()
@@ -70,28 +71,22 @@ void GLApplication::create_scene()
 
   // height field
   {
-    const unsigned w(50), h(50);
+    const unsigned w(100), h(100);
     std::vector<float> height_field_pixels(w * h, 0.0f);
     for (auto j = 0; j < h; ++j)
     {
       for (auto i = 0; i < w; ++i)
       {
-        height_field_pixels[i + j * w] = 0.1f * sin((static_cast<float>(j) / h) * 20.0f) + 0.1f * cos((static_cast<float>(i) / w) * 20.0f);
+        height_field_pixels[i + j * w] = 0.5f * sin((static_cast<float>(j) / h) * 20.0f) + 0.5f * cos((static_cast<float>(i) / w) * 20.0f);
       }
     }
 
     m_height_field.reset(new terrain::height_field(w, h, vec2(0.1, 0.1), &height_field_pixels[0]));
   }
 
-
   // camera
-  {
-    vec3 eye(3.0f, 3.0f, -1.0f);
-    vec3 target(3.0f, 1.0f, 1.0f);
-    vec3 up = world_up();
-
-    m_view = glm::lookAt(eye, target, up);
-  }
+  m_camera.set_position(vec3(5.0f, 5.0f, 5.0f));
+  m_camera.set_orientation(vec3(0.0f, 55.0f, -45.0f));
 
   // shaders
   {
@@ -286,37 +281,34 @@ void GLApplication::render()
   glClearColor(m_background_color.x, m_background_color.y, m_background_color.z, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  const mat4 view_projection_matrix(m_camera.projection_matrix() * m_camera.view_matrix()); // TODO calculate only if one of them are changed and store in camera
+
   for (const auto& mesh : m_meshes)
   {
     if (m_draw_mode == draw_mode::shaded || m_draw_mode == draw_mode::shaded_wireframe)
     {
-      mesh->render(m_shader_manager.get("per_pixel_diffuse"), m_projection * m_view);
+      mesh->render(m_shader_manager.get("per_pixel_diffuse"), view_projection_matrix);
     }
     if (m_draw_mode == draw_mode::wireframe || m_draw_mode == draw_mode::shaded_wireframe)
     {
-      mesh->render(m_shader_manager.get("wireframe"), m_projection * m_view);
+      mesh->render(m_shader_manager.get("wireframe"), view_projection_matrix);
     }
 
     if (m_render_normals)
     {
-      mesh->render(m_shader_manager.get("normal_visualize"), m_projection * m_view);
+      mesh->render(m_shader_manager.get("normal_visualize"), view_projection_matrix);
     }
   }
 
   if (m_render_axis)
   {
-    m_axis->render(m_shader_manager.get("simple_color"), m_projection * m_view);
+    m_axis->render(m_shader_manager.get("simple_color"), view_projection_matrix);
   }
 }
 
 void GLApplication::request_update()
 {
   glutPostRedisplay();
-}
-
-void GLApplication::update_projection()
-{
-  m_projection = glm::perspectiveFov(glm::radians(75.0), static_cast<double>(m_window_size.x), static_cast<double>(m_window_size.y), 0.01, 1000.0);
 }
 
 void GLApplication::destroy_scene() noexcept
@@ -343,19 +335,57 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
   bool need_redraw(false);
   switch (character)
   {
-    case 'r':
+    case 'w':
     {
-      break;
-    }
-    case 'u':
-    {
+      float dz = 1.0;
+      glm::mat4 mat = app.m_camera.view_matrix();
+
+      glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
+      glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+
+      const float speed = 0.1f;
+      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * speed);
+      need_redraw = true;
       break;
     }
     case 's':
     {
+      float dz = -1.0;
+      glm::mat4 mat = app.m_camera.view_matrix();
+
+      glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
+      glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+
+      const float speed = 0.1f;
+      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * speed);
+      need_redraw = true;
       break;
     }
     case 'a':
+    {
+      float dx = -1.0;
+      glm::mat4 mat = app.m_camera.view_matrix();
+
+      glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+
+      const float speed = 0.1f;
+      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * speed);
+      need_redraw = true;
+      break;
+    }
+    case 'd':
+    {
+      float dx = 1.0;
+      glm::mat4 mat = app.m_camera.view_matrix();
+
+      glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
+
+      const float speed = 0.1f;
+      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * speed);
+      need_redraw = true;
+      break;
+    }
+    case 'x':
     {
       app.m_render_axis = !app.m_render_axis;
       need_redraw = true;
@@ -371,7 +401,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
       need_redraw = true;
       break;
     }
-    case 'd':
+    case 'm':
     {
       app.m_draw_mode = static_cast<draw_mode::Enum>(app.m_draw_mode + 1);
       if (app.m_draw_mode == draw_mode::count)
@@ -410,10 +440,49 @@ void GLApplication::display_callback()
 void GLApplication::reshape_callback(int w, int h)
 {
   GLApplication& app(instance());
-  app.m_window_size.x = w > 1 ? w : 1;
-  app.m_window_size.y = h > 1 ? h : 1;
-  app.update_projection();
+  w = w > 1 ? w : 1;
+  h = h > 1 ? h : 1;
 
-  glViewport(0, 0, app.m_window_size.x, app.m_window_size.y);
+  app.m_camera.set_window_size(uvec2(w, h));
+  app.m_camera.update_projection();
+
+  glViewport(0, 0, app.m_camera.window_size().x, app.m_camera.window_size().y);
+}
+
+void GLApplication::mouse_button_callback(int button, int state, int x, int y)
+{
+  GLApplication& app = instance();
+
+  app.m_mouse_left_down = button == GLUT_LEFT_BUTTON && state == GLUT_DOWN;
+
+  if (app.m_mouse_left_down)
+  {
+    app.m_mouse_position.x = static_cast<float>(x);
+    app.m_mouse_position.y = static_cast<float>(y);
+  }
+}
+
+void GLApplication::mouse_move_callback(int x, int y)
+{
+  GLApplication& app = instance();
+  
+  bool need_redraw(false);
+  if (app.m_mouse_left_down)
+  {
+    const vec2 current_mouse(static_cast<float>(x), static_cast<float>(y));
+    const vec2 mouse_delta(current_mouse - app.m_mouse_position);
+
+    const float mouse_Sensitivity = 0.1f;
+    app.m_camera.set_orientation(app.m_camera.orientation() + vec3(0.0, mouse_Sensitivity * mouse_delta.y, mouse_Sensitivity * mouse_delta.x));
+    app.m_mouse_position = current_mouse;
+    app.m_camera.update_view();
+
+    need_redraw = true;
+  }
+
+  if (need_redraw)
+  {
+    glutPostRedisplay();
+  }
 }
 }
