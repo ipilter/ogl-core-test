@@ -17,7 +17,7 @@ public:
   mesh(const std::vector<vec3>& vertices, const std::vector<unsigned>& indices, const unsigned primitive_type);
   ~mesh();
 
-  void render(const shader_program& shader_program, const mat4& view_projection);
+  void render(const shader_program& shader_program, const mat4& view, const mat4& projection, const vec3& light_position);
 
   void add_colors(const std::vector<vec3>& buffer);
   void add_normals(const std::vector<vec3>& buffer);

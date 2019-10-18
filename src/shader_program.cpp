@@ -4,13 +4,14 @@
 
 namespace opengl
 {
-shader_program::shader_program()
+shader_program::shader_program(const std::string name)
   : m_program(glCreateProgram())
   , m_vertex_shader(0)
   , m_geometry_shader(0)
   , m_fragment_shader(0)
   , m_need_normal_matrix(false)
   , m_need_texture(false)
+  , m_name(name)
 {}
 
 shader_program::~shader_program()
@@ -128,6 +129,26 @@ bool shader_program::need_texture() const
   return m_need_texture;
 }
 
+void shader_program::set_need_model_view_matrix(const bool v)
+{
+  m_need_model_view_matrix = v;
+}
+
+bool shader_program::need_model_view_matrix() const
+{
+  return m_need_model_view_matrix;
+}
+
+void shader_program::set_need_light_position(const bool v)
+{
+  m_need_light_position = v;
+}
+
+bool shader_program::need_light_position() const
+{
+  return m_need_light_position;
+}
+
 void shader_program::compile(const unsigned shader_id)
 {
   glCompileShader(shader_id);
@@ -216,9 +237,9 @@ void shader_program::setUniform2fv(const std::string& name, const unsigned count
   glUniform2fv(getUniformLoc(name), count, ptr);
 }
 
-void shader_program::setUniform3fv(const std::string& name, const unsigned count, float* ptr) const
+void shader_program::setUniform3fv(const std::string& name, const unsigned count, const vec3& v) const
 {
-  glUniform3fv(getUniformLoc(name), count, ptr);
+  glUniform3fv(getUniformLoc(name), count, &v.x);
 }
 
 void shader_program::setUniform4fv(const std::string& name, const unsigned count, float* ptr) const

@@ -30,7 +30,7 @@ public:
   static unsigned invalid_attribute_location();
 
 public:
-  shader_program();
+  shader_program(const std::string name);
   ~shader_program();
 
   unsigned id() const;
@@ -47,6 +47,11 @@ public:
   bool need_normal_matrix() const;
   void set_need_height_field(const bool v);
   bool need_texture() const;
+  void set_need_light_position(const bool v);
+  bool need_light_position() const;
+  
+  void set_need_model_view_matrix(const bool v);
+  bool need_model_view_matrix() const;
 
   void setUniform1i(const std::string& name, const unsigned value) const;
 
@@ -57,7 +62,7 @@ public:
 
   void setUniform1fv(const std::string& name, const unsigned count, float* ptr) const;
   void setUniform2fv(const std::string& name, const unsigned count, float* ptr) const;
-  void setUniform3fv(const std::string& name, const unsigned count, float* ptr) const;
+  void setUniform3fv(const std::string& name, const unsigned count, const vec3& v) const;
   void setUniform4fv(const std::string& name, const unsigned count, float* ptr) const;
 
   void setUniformMatrix4fv(const std::string& name, const mat4& matrix) const;
@@ -78,6 +83,10 @@ private:
 
   bool m_need_normal_matrix;
   bool m_need_texture;
+  bool m_need_model_view_matrix;
+  bool m_need_light_position;
+
+  const std::string m_name;
 
 private:
   static std::unordered_map<unsigned, std::string>& kind_name_table();

@@ -22,7 +22,7 @@ shader_program& shader_manager::add(const std::string& name)
     throw std::runtime_error(ss.str());
   }
 
-  shader_program::ptr program(new shader_program());
+  shader_program::ptr program(new shader_program(name));
   if (program == nullptr)
   {
     throw std::runtime_error("out of memory");

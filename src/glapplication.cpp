@@ -21,6 +21,8 @@ GLApplication::GLApplication()
   , m_background_color(0)
   , m_mouse_left_down(false)
   , m_mouse_position(0.0)
+  , m_mouse_sensitivity(0.3f)
+  , m_keyboard_speed(0.3f)
 {}
 
 GLApplication::~GLApplication()
@@ -71,7 +73,7 @@ void GLApplication::create_scene()
 
   // height field
   {
-    const unsigned w(100), h(100);
+    const unsigned w(10), h(10);
     std::vector<float> height_field_pixels(w * h, 0.0f);
     for (auto j = 0; j < h; ++j)
     {
@@ -81,12 +83,12 @@ void GLApplication::create_scene()
       }
     }
 
-    m_height_field.reset(new terrain::height_field(w, h, vec2(0.1, 0.1), &height_field_pixels[0]));
+    m_height_field.reset(new terrain::height_field(w, h, vec2(1.05, 1.05), &height_field_pixels[0]));
   }
 
   // camera
-  m_camera.set_position(vec3(5.0f, 5.0f, 5.0f));
-  m_camera.set_orientation(vec3(0.0f, 55.0f, -45.0f));
+  m_camera.set_position(vec3(-5.0f, 5.0f, 5.0f));
+  m_camera.set_orientation(vec3(0.0f, 20.0f, 90.0f));
 
   // shaders
   {
@@ -122,18 +124,23 @@ void GLApplication::create_scene()
     }
 
     {
-      std::string vs_code, fs_code;
+      std::string vs_code, gs_code, fs_code;
       io::load_src("shaders\\per_pixel_diffuse.vert", vs_code);
+      io::load_src("shaders\\per_pixel_diffuse.geom", gs_code);
       io::load_src("shaders\\per_pixel_diffuse.frag", fs_code);
 
       shader_program& prog = m_shader_manager.add("per_pixel_diffuse");
       prog.add_vertex_shader(vs_code);
+      prog.add_geometry_shader(gs_code);
       prog.add_fragment_shader(fs_code);
       prog.link();
 
       prog.set_attribute_location(shader_program::attribute_kind::vertex, 0);
       prog.set_attribute_location(shader_program::attribute_kind::uv, 1);
       prog.set_need_height_field(true);  // TODO: pass here...
+      prog.set_need_normal_matrix(true);
+      prog.set_need_model_view_matrix(true);
+      prog.set_need_light_position(true);
     }
 
     {
@@ -271,7 +278,7 @@ void GLApplication::create_scene()
       mesh::ptr mesh = m_meshes.back();
       mesh->add_uvs(uvs);
       mesh->set_texture(m_height_map_texture_id);
-      mesh->set_transformation(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f)));
+      mesh->set_transformation(glm::rotate(mat4(1.0f), glm::radians(0.0f), vec3(1.0f, 0.0f, 0.0f)));
     }
   }
 }
@@ -281,28 +288,28 @@ void GLApplication::render()
   glClearColor(m_background_color.x, m_background_color.y, m_background_color.z, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  const mat4 view_projection_matrix(m_camera.projection_matrix() * m_camera.view_matrix()); // TODO calculate only if one of them are changed and store in camera
+  vec3 light_position(100, 200, -4000);
 
   for (const auto& mesh : m_meshes)
   {
     if (m_draw_mode == draw_mode::shaded || m_draw_mode == draw_mode::shaded_wireframe)
     {
-      mesh->render(m_shader_manager.get("per_pixel_diffuse"), view_projection_matrix);
+      mesh->render(m_shader_manager.get("per_pixel_diffuse"), m_camera.view_matrix(), m_camera.projection_matrix(), light_position);
     }
     if (m_draw_mode == draw_mode::wireframe || m_draw_mode == draw_mode::shaded_wireframe)
     {
-      mesh->render(m_shader_manager.get("wireframe"), view_projection_matrix);
+      mesh->render(m_shader_manager.get("wireframe"), m_camera.view_matrix(), m_camera.projection_matrix(), light_position);
     }
 
     if (m_render_normals)
     {
-      mesh->render(m_shader_manager.get("normal_visualize"), view_projection_matrix);
+      mesh->render(m_shader_manager.get("normal_visualize"), m_camera.view_matrix(), m_camera.projection_matrix(), light_position);
     }
   }
 
   if (m_render_axis)
   {
-    m_axis->render(m_shader_manager.get("simple_color"), view_projection_matrix);
+    m_axis->render(m_shader_manager.get("simple_color"), m_camera.view_matrix(), m_camera.projection_matrix(), light_position);
   }
 }
 
@@ -343,8 +350,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
       glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
       glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
 
-      const float speed = 0.1f;
-      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * speed);
+      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * app.m_keyboard_speed);
       need_redraw = true;
       break;
     }
@@ -356,8 +362,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
       glm::vec3 forward(mat[0][2], mat[1][2], mat[2][2]);
       glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
 
-      const float speed = 0.1f;
-      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * speed);
+      app.m_camera.set_position(app.m_camera.position() + (-dz * forward) * app.m_keyboard_speed);
       need_redraw = true;
       break;
     }
@@ -368,8 +373,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
 
       glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
 
-      const float speed = 0.1f;
-      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * speed);
+      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * app.m_keyboard_speed);
       need_redraw = true;
       break;
     }
@@ -380,8 +384,7 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
 
       glm::vec3 strafe(mat[0][0], mat[1][0], mat[2][0]);
 
-      const float speed = 0.1f;
-      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * speed);
+      app.m_camera.set_position(app.m_camera.position() + (dx * strafe) * app.m_keyboard_speed);
       need_redraw = true;
       break;
     }
@@ -472,8 +475,7 @@ void GLApplication::mouse_move_callback(int x, int y)
     const vec2 current_mouse(static_cast<float>(x), static_cast<float>(y));
     const vec2 mouse_delta(current_mouse - app.m_mouse_position);
 
-    const float mouse_Sensitivity = 0.1f;
-    app.m_camera.set_orientation(app.m_camera.orientation() + vec3(0.0, mouse_Sensitivity * mouse_delta.y, mouse_Sensitivity * mouse_delta.x));
+    app.m_camera.set_orientation(app.m_camera.orientation() + vec3(0.0, app.m_mouse_sensitivity * mouse_delta.y, app.m_mouse_sensitivity * mouse_delta.x));
     app.m_mouse_position = current_mouse;
     app.m_camera.update_view();
 

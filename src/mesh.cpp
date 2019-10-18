@@ -79,7 +79,7 @@ const mat4& mesh::get_transformation() const
   return m_transformation;
 }
 
-void mesh::render(const shader_program& shader_program, const mat4& view_projection)
+void mesh::render(const shader_program& shader_program, const mat4& view, const mat4& projection, const vec3& light_position)
 {
   glBindVertexArray(m_vertex_array_id);
 
@@ -100,11 +100,21 @@ void mesh::render(const shader_program& shader_program, const mat4& view_project
   }
 
   glUseProgram(shader_program.id());
-  shader_program.setUniformMatrix4fv("model_view_projection_matrix", view_projection * m_transformation);
+  shader_program.setUniformMatrix4fv("model_view_projection_matrix", projection * view * m_transformation);
 
   if (shader_program.need_normal_matrix())
   {
     shader_program.setUniformMatrix4fv("normal_matrix", glm::transpose(glm::inverse(m_transformation)));
+  }
+
+  if (shader_program.need_model_view_matrix())
+  {
+    shader_program.setUniformMatrix4fv("model_view_matrix", view * m_transformation);
+  }
+
+  if (shader_program.need_light_position())
+  {
+    shader_program.setUniform3fv("light_position", 1, light_position);
   }
 
   if (m_texture_id && shader_program.need_texture())

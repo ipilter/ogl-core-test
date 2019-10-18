@@ -121,5 +121,8 @@
     <None Include="shaders\wireframe.geom">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\per_pixel_diffuse.geom">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

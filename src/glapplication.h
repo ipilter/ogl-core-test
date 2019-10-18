@@ -54,6 +54,8 @@ private:
   bool m_render_axis;
   bool m_render_normals;
   vec2 m_mouse_position;
+  float m_mouse_sensitivity;
+  float m_keyboard_speed;
 
 private:
   static const vec3& world_up();
