@@ -13,6 +13,18 @@ namespace opengl
 class GLApplication
 {
 public:
+  struct settings
+  {
+    settings(const vec3& cp, const vec3& co)
+      : camera_position(cp)
+      , camera_orientation(co)
+    {}
+
+    vec3 camera_position;
+    vec3 camera_orientation;
+  };
+
+public:
   static GLApplication& instance();
 
 public:
@@ -36,6 +48,8 @@ public:
 private:
   void create_scene();
   void destroy_scene() noexcept;
+  void parse_settings(const std::string& path);
+  void save_settings(const std::string& path);
 
 private:
   // camera
@@ -56,6 +70,7 @@ private:
   vec2 m_mouse_position;
   float m_mouse_sensitivity;
   float m_keyboard_speed;
+  settings m_settings;
 
 private:
   static const vec3& world_up();

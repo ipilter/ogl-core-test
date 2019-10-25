@@ -1,10 +1,13 @@
 #pragma once
 
+#include <fstream>
+
 #include "types.h"
 #include "io.h"
 #include "glapplication.h"
 #include "range.h"
 #include "range_mapper.h"
+#include <iomanip>
 
 namespace opengl
 {
@@ -23,10 +26,39 @@ GLApplication::GLApplication()
   , m_mouse_position(0.0)
   , m_mouse_sensitivity(0.3f)
   , m_keyboard_speed(0.3f)
+  , m_settings(vec3(-1.0f, 2.0f, 3.0f), vec3(0.0f, 20.0f, 45.0f))
 {}
 
 GLApplication::~GLApplication()
 {}
+
+void GLApplication::parse_settings(const std::string& path)
+{
+  std::ifstream stream(path);
+  if (stream.is_open())
+  {
+    stream >> m_settings.camera_position.x;
+    stream >> m_settings.camera_position.y;
+    stream >> m_settings.camera_position.z;
+
+    stream >> m_settings.camera_orientation.x;
+    stream >> m_settings.camera_orientation.y;
+    stream >> m_settings.camera_orientation.z;
+  }
+}
+
+void GLApplication::save_settings(const std::string& path)
+{
+  m_settings.camera_position = m_camera.position();
+  m_settings.camera_orientation = m_camera.orientation();
+
+  std::ofstream stream(path);
+  if (stream.is_open())
+  {
+    stream << std::fixed << std::setprecision(6) << m_settings.camera_position.x << " " << m_settings.camera_position.y << " " << m_settings.camera_position.z << "\n";
+    stream << m_settings.camera_orientation.x << " " << m_settings.camera_orientation.y << " " << m_settings.camera_orientation.z << "\n";
+  }
+}
 
 void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version)
 {
@@ -35,7 +67,12 @@ void GLApplication::init(int argc, char* argv[], const uvec2& window_size, const
     throw std::runtime_error("missing parameter");
   }
 
+  const std::string settings_file_path("settings.xml");
+  parse_settings(settings_file_path);
+
   m_camera.set_window_size(window_size);
+  m_camera.set_position(m_settings.camera_position);
+  m_camera.set_orientation(m_settings.camera_orientation);
 
   glutInit(&argc, argv);
   glutInitContextVersion(opengl_version.x, opengl_version.y);
@@ -75,20 +112,18 @@ void GLApplication::create_scene()
   {
     const unsigned w(10), h(10);
     std::vector<float> height_field_pixels(w * h, 0.0f);
+    vec2 a(0.3f);
+    vec2 b(22.5f);
     for (auto j = 0; j < h; ++j)
     {
       for (auto i = 0; i < w; ++i)
       {
-        height_field_pixels[i + j * w] = 0.5f * sin((static_cast<float>(j) / h) * 20.0f) + 0.5f * cos((static_cast<float>(i) / w) * 20.0f);
+        height_field_pixels[i + j * w] = a.x * sin((static_cast<float>(j) / h) * b.x) + a.y * cos((static_cast<float>(i) / w) * b.y);
       }
     }
 
     m_height_field.reset(new terrain::height_field(w, h, vec2(1.05, 1.05), &height_field_pixels[0]));
   }
-
-  // camera
-  m_camera.set_position(vec3(-5.0f, 5.0f, 5.0f));
-  m_camera.set_orientation(vec3(0.0f, 20.0f, 90.0f));
 
   // shaders
   {
@@ -412,6 +447,12 @@ void GLApplication::keyboard_callback(unsigned char character, int /*x*/, int /*
         app.m_draw_mode = static_cast<draw_mode::Enum>(0);
       }
       need_redraw = true;
+      break;
+    }
+    case 'C':
+    {
+      const std::string settings_file_path("settings.xml");
+      app.save_settings(settings_file_path);
       break;
     }
     case 27:
