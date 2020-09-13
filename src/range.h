@@ -2,9 +2,16 @@
 
 namespace math
 {
+// range between [begin end)
 template<class T>
 class range_t
 {
+public:
+  range_t(const T begin, const T end)
+    : m_begin(begin)
+    , m_end(end)
+  {}
+
 public:
   class iterator
   {
@@ -16,19 +23,19 @@ public:
       return *this;
     }
 
-    iterator operator++(T)
+    iterator operator++( T )
     {
-      iterator copy(*this);
+      iterator copy( *this );
       ++m_position;
       return copy;
     }
 
-    bool operator == (const iterator& rhs) const
+    bool operator == ( const iterator& rhs ) const
     {
       return m_position == rhs.m_position;
     }
 
-    bool operator != (const iterator& rhs) const
+    bool operator != ( const iterator& rhs ) const
     {
       return m_position != rhs.m_position;
     }
@@ -39,19 +46,13 @@ public:
     }
 
   protected:
-    iterator(const T start)
-      : m_position(start)
+    iterator( const T start )
+      : m_position( start )
     {}
 
   private:
     T m_position;
   };
-
-public:
-  range_t(const T begin, const T end)
-    : m_begin(begin)
-    , m_end(end)
-  {}
 
   const iterator& begin() const
   {
@@ -63,6 +64,7 @@ public:
     return m_end;
   }
 
+private:
   const iterator m_begin;
   const iterator m_end;
 };

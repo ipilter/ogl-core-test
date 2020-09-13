@@ -37,11 +37,6 @@ mesh::~mesh()
     glDeleteBuffers(1, &m_color_buffer_id);
   }
 
-  if (m_normal_buffer_id)
-  {
-    glDeleteBuffers(1, &m_normal_buffer_id);
-  }
-
   if (m_uv_buffer_id)
   {
     glDeleteBuffers(1, &m_uv_buffer_id);
@@ -51,11 +46,6 @@ mesh::~mesh()
 void mesh::add_colors(const std::vector<vec3>& colors)
 {
   add_buffer(colors, GL_ARRAY_BUFFER, m_color_buffer_id);
-}
-
-void mesh::add_normals(const std::vector<vec3>& normals)
-{
-  add_buffer(normals, GL_ARRAY_BUFFER, m_normal_buffer_id);
 }
 
 void mesh::add_uvs(const std::vector<vec2>& uvs)
@@ -82,8 +72,8 @@ void mesh::render(const shader_program& shader_program, const mat4& view, const 
 {
   glBindVertexArray(m_vertex_array_id);
 
-  const unsigned buff[] = { m_vertex_buffer_id, m_color_buffer_id, m_normal_buffer_id, m_uv_buffer_id }; // buffers
-  const unsigned buffer_data_size[] = { 3, 3, 3, 2 }; // buffer element sizes
+  const unsigned buff[] = { m_vertex_buffer_id, m_color_buffer_id, m_uv_buffer_id }; // buffers
+  const unsigned buffer_data_size[] = { 3, 3, 2 }; // buffer element sizes
 
   // vertex is a must
   enable_vertex_attribute(shader_program.attribute_location(shader_program::attribute_kind::vertex), buff[0], buffer_data_size[0]);

@@ -117,7 +117,7 @@ void GLApplication::create_scene()
   m_background_color = vec3(0.15, 0.15, 0.15);
 
   // height field
-  const uvec2 size(20, 10);
+  const uvec2 size(3, 2);
   terrain::height_field::value_t h_min(100000), h_max(-100000);
   {
     terrain::height_field::buffer_t height_field_pixels(size.s * size.t, 0.0f);
@@ -145,11 +145,9 @@ void GLApplication::create_scene()
     //h_max = value;
 
     vec2 resolution(0.1f, 0.1f);
-    height_field_pixels[0 + 0 * size.s] = 0.3f / 1.0f;
-    height_field_pixels[1 + 0 * size.s] = 0.2f / 1.0f;
-    height_field_pixels[2 + 0 * size.s] = 0.1f / 1.0f;
+    height_field_pixels[0 + 0 * size.s] = 1.0f;
     h_min = 0.0f;
-    h_max = 0.3f;
+    h_max = 1.0f;
 
     m_height_field.reset(new terrain::height_field(size, vec2(1.1f, 1.1f)));
     m_height_field->swap_data(height_field_pixels);
