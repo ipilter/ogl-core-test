@@ -22,7 +22,8 @@ public:
   void add_colors(const std::vector<vec3>& buffer);
   void add_normals(const std::vector<vec3>& buffer);
   void add_uvs(const std::vector<vec2>& buffer);
-  void set_texture(const unsigned texture_id);
+  void set_height_field_texture(const unsigned id);
+  void set_normal_field_texture(const unsigned id);
   void set_transformation(const mat4& m);
   const mat4& get_transformation() const;
 
@@ -54,6 +55,7 @@ private:
   unsigned m_uv_buffer_id;
   unsigned m_index_buffer_id;
 
-  unsigned m_texture_id;
+  unsigned m_height_field_texture_id;
+  unsigned m_normal_field_texture_id;
 };
 }

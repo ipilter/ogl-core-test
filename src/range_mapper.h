@@ -29,7 +29,7 @@ public:
     {
       return 0;
     }
-    return T( ( m_b1 + ( s - static_cast<T>(m_a1) ) * ( m_b2 - m_b1 ) ) / static_cast<T>(a_norm));
+    return T( ( m_b1 + ( s - m_a1 ) * ( m_b2 - m_b1 ) ) / a_norm);
   }
 private:
   F m_a1;

@@ -9,23 +9,22 @@ out vec3 vertex_color;
 uniform mat4 model_view_projection_matrix;
 uniform mat4 normal_matrix;
 
+in vec2 v_uv[];
+
 void main()
 {
   for(int i = 0; i < gl_in.length(); ++i)
   {
     vec3 p = gl_in[i].gl_Position.xyz;
-    vec3 pprev = gl_in[i == 0                  ? gl_in.length() - 1 : i - 1].gl_Position.xyz;
-    vec3 pnext = gl_in[i == gl_in.length() - 1 ?                  0 : i + 1].gl_Position.xyz;
+    vec3 n = vec3(0,1,0);    
+    n = (normal_matrix * vec4(n, 0.0)).xyz;
 
-    vec3 normal = normalize((cross(pnext-p, pprev-p)));
-
-    gl_Position =  model_view_projection_matrix * vec4(p, 1);
-
-    vertex_color = (normal_matrix * vec4(normal, 0.0)).xyz;
+    gl_Position = model_view_projection_matrix * vec4(p, 1);
+    vertex_color = (normal_matrix * vec4(n, 0.0)).xyz; //(normal_matrix * vec4(v_uv[i].xy, 0.0, 0.0)).xyz
     EmitVertex();
 
-    gl_Position =  model_view_projection_matrix * vec4(p + normal, 1);
-    vertex_color = (normal_matrix * vec4(normal, 0.0)).xyz;
+    gl_Position =  model_view_projection_matrix * vec4(p + n, 1);
+    vertex_color = (normal_matrix * vec4(n, 0.0)).xyz;
     EmitVertex();
 
     EndPrimitive();

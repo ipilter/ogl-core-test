@@ -14,10 +14,9 @@ mesh::mesh(const std::vector<vec3>& vertices, const std::vector<unsigned>& indic
   , m_vertex_array_id(0)
   , m_vertex_buffer_id(0)
   , m_color_buffer_id(0)
-  , m_normal_buffer_id(0)
   , m_uv_buffer_id(0)
   , m_index_buffer_id(0)
-  , m_texture_id(0)
+  , m_height_field_texture_id(0)
 {
   glGenVertexArrays(1, &m_vertex_array_id);
 
@@ -64,9 +63,9 @@ void mesh::add_uvs(const std::vector<vec2>& uvs)
   add_buffer(uvs, GL_ARRAY_BUFFER, m_uv_buffer_id);
 }
 
-void mesh::set_texture(const unsigned texture_id)
+void mesh::set_height_field_texture(const unsigned id)
 {
-  m_texture_id = texture_id;
+  m_height_field_texture_id = id;
 }
 
 void mesh::set_transformation(const mat4& m)
@@ -117,11 +116,11 @@ void mesh::render(const shader_program& shader_program, const mat4& view, const 
     shader_program.setUniform3fv("light_position", 1, light_position);
   }
 
-  if (m_texture_id && shader_program.need_texture())
+  if (m_height_field_texture_id && shader_program.need_height_field())
   {
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_texture_id);
-    shader_program.setUniform1i("height_map", 0); // TODO: 0 texture slot is used for the texture, store it instead
+    glBindTexture(GL_TEXTURE_2D, m_height_field_texture_id);
+    shader_program.setUniform1i("height_field", 0); // TODO: 0 texture slot is used for the texture, store it instead
   }
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer_id);

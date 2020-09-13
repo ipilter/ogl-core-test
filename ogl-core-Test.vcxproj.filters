@@ -31,6 +31,9 @@
     <Filter Include="Header Files\terrain">
       <UniqueIdentifier>{82164bcc-ca4a-4b63-8d96-78adf58d9752}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\terrain">
+      <UniqueIdentifier>{945b28b8-ff7d-46c9-a2cc-994535c9b012}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mesh.cpp">
@@ -50,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\elevation_reader.cpp">
+      <Filter>Source Files\terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +94,15 @@
     </ClInclude>
     <ClInclude Include="src\camera.h">
       <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\field.h">
+      <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\elevation_reader.h">
+      <Filter>Header Files\terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ppm.h">
+      <Filter>Header Files\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

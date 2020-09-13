@@ -3,7 +3,7 @@
 
 // calculate the normal in geom shader and pass it here
 
-uniform sampler2D height_map;
+uniform sampler2D height_field;
 uniform vec3 light_position;
 
 in vec3 vertex_color;

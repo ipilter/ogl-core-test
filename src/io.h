@@ -8,26 +8,22 @@
 namespace io
 {
 template<class T>
-T parseNumber(const std::string& str)
+T parse_number(const std::string& str)
 {
   T t(0);
   if (!(std::istringstream(str) >> t))
   {
-    throw std::runtime_error(std::string("cannot parse ") + str + " as number");
+    throw std::runtime_error(std::string( "cannot parse " ) + str + " as number");
   }
   return t;
 }
 
-inline void load_src(const std::string& path, std::string& src)
+inline void read_text_file(const std::string& path, std::string& src)
 {
-  std::ifstream file(path.c_str());
+  std::ifstream file( path.c_str());
   if (!file.is_open())
   {
-    std::stringstream ss;
-    ss << "Could not open shader source file [";
-    ss << path;
-    ss << "]";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error( std::string( "Could not open file: " ) + path );
   }
 
   std::stringstream ss;

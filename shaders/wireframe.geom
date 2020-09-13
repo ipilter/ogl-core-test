@@ -21,11 +21,11 @@ void main()
     vec3 pnext = gl_in[i == gl_in.length() - 1 ? 0 : i + 1].gl_Position.xyz;
 
     gl_Position = model_view_projection_matrix * vec4(p, 1);
-    vertex_color = vec3(1.0, 1.0, 1.0);
+    vertex_color = vec3(1.0, 1.0, 1.0) * 0.6;
     EmitVertex();
 
     gl_Position = model_view_projection_matrix * vec4(pnext, 1);
-    vertex_color = vec3(1.0, 1.0, 1.0);
+    vertex_color = vec3(1.0, 1.0, 1.0) * 0.6;
     EmitVertex();
 
     EndPrimitive();

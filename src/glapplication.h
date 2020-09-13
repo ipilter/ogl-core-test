@@ -13,21 +13,6 @@ namespace opengl
 class GLApplication
 {
 public:
-  struct settings
-  {
-    settings(const vec3& cp, const vec3& co)
-      : camera_position(cp)
-      , camera_orientation(co)
-    {}
-
-    vec3 camera_position;
-    vec3 camera_orientation;
-  };
-
-public:
-  static GLApplication& instance();
-
-public:
   struct draw_mode
   {
     enum Enum
@@ -38,6 +23,26 @@ public:
       , count
     };
   };
+
+  struct settings
+  {
+    settings(const vec3& cp, const vec3& co, draw_mode::Enum dm, bool ra, bool rn)
+      : camera_position(cp)
+      , camera_orientation(co)
+      , m_draw_mode(dm)
+      , m_render_axis(ra)
+      , m_render_normals(rn)
+    {}
+
+    vec3 camera_position;
+    vec3 camera_orientation;
+    draw_mode::Enum m_draw_mode;
+    bool m_render_axis;
+    bool m_render_normals;
+  };
+
+public:
+  static GLApplication& instance();
 
 public:
   void init(int argc, char* argv[], const uvec2& window_size, const uvec2& opengl_version);
@@ -60,16 +65,15 @@ private:
   std::vector<mesh::ptr> m_meshes;
   shader_manager m_shader_manager;
   terrain::height_field::ptr m_height_field;
-  unsigned m_height_map_texture_id;
+  unsigned m_height_field_texture_id;
+
   vec3 m_background_color;
 
   bool m_mouse_left_down;
-  draw_mode::Enum m_draw_mode;
-  bool m_render_axis;
-  bool m_render_normals;
   vec2 m_mouse_position;
   float m_mouse_sensitivity;
   float m_keyboard_speed;
+  float m_keyboard_step;
   settings m_settings;
 
 private:

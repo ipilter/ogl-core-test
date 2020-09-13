@@ -10,7 +10,7 @@ shader_program::shader_program(const std::string name)
   , m_geometry_shader(0)
   , m_fragment_shader(0)
   , m_need_normal_matrix(false)
-  , m_need_texture(false)
+  , m_need_height_field(false)
   , m_name(name)
 {}
 
@@ -121,12 +121,12 @@ bool shader_program::need_normal_matrix() const
 
 void shader_program::set_need_height_field(const bool v)
 {
-  m_need_texture = v;
+  m_need_height_field = v;
 }
 
-bool shader_program::need_texture() const
+bool shader_program::need_height_field() const
 {
-  return m_need_texture;
+  return m_need_height_field;
 }
 
 void shader_program::set_need_model_view_matrix(const bool v)

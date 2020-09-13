@@ -3,11 +3,11 @@
 
 #include <stdexcept>
 
-#include <gl\gl3w.h>
+#include "gl\gl3w.h"
 
 #pragma warning( push )
 #pragma warning( disable : 4505 )
-#include <gl\freeglut.h>
+#include "gl\freeglut.h"
 #pragma warning( pop )
 
 namespace opengl

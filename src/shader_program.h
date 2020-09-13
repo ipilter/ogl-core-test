@@ -21,7 +21,6 @@ public:
     {
       vertex
       , color
-      , normal
       , uv
       , count
     };
@@ -46,15 +45,13 @@ public:
   void set_need_normal_matrix(const bool v);
   bool need_normal_matrix() const;
   void set_need_height_field(const bool v);
-  bool need_texture() const;
+  bool need_height_field() const;
   void set_need_light_position(const bool v);
   bool need_light_position() const;
-  
   void set_need_model_view_matrix(const bool v);
   bool need_model_view_matrix() const;
 
   void setUniform1i(const std::string& name, const unsigned value) const;
-
   void setUniform1f(const std::string& name, const float value) const;
   void setUniform2f(const std::string& name, const float value0, const float value1) const;
   void setUniform3f(const std::string& name, const float value0, const float value1, const float value2) const;
@@ -81,8 +78,9 @@ private:
   std::map<unsigned, unsigned> m_id_kind_table;
   std::map<attribute_kind::Enum, unsigned> m_attribute_location_table;
 
+  bool m_need_height_field;
+
   bool m_need_normal_matrix;
-  bool m_need_texture;
   bool m_need_model_view_matrix;
   bool m_need_light_position;
 
